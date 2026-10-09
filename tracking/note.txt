@@ -151,16 +151,89 @@ Important conclusion:
 The demo is meant to show the end-to-end practical flow from ultrasound image to predicted lesion region.
 
 
+Session 6 - Streamlit Batch Application & Metrics Evaluation
+
+In Session 6, we expanded the interactive demonstration application to support batch analysis and standardized the quantitative evaluation glossary.
+
+Main achievements:
+- Extended Streamlit app (`G17-Model/app.py`) to handle multi-scan batch uploads.
+- Optimized preprocessing pipeline with `ThreadPoolExecutor` to parallelize SRAD and CLAHE across CPU threads.
+- Implemented batched tensor stacking for 1-pass forward inference.
+- Implemented cached probability slicing for instant (<1ms) threshold adjustments.
+- Added batch summary reporting table (pixel counts, lesion area percentages, and mean confidence).
+- Added 4-column side-by-side comparative inspection for individual scans.
+Session 7: Systematic Ablation Experiments & Architectural Impact
+
+Empirical evaluation conducted on an NVIDIA RTX 6000 Ada/Blackwell architecture across all 266 internal test scans (8:1:1 Stratified Group Split) completing the 2x2 factorial ablation matrix (Architecture x Preprocessing).
+
+Benchmark Baseline Provenance:
+- Chen et al. (2026) Published Benchmark: 0.9142 Dice (Evaluated on private paired USCT reflection + transmission data; not handheld ultrasound).
+- Iteration 1 Proof-of-Concept Baseline: 0.7909 Dice, 0.3496 Loss (Initial adaptation on public handheld ultrasound, limited by FP32 computation and platform timeouts).
+
+2x2 Factorial Ablation Matrix:
+                 | Enhanced (SRAD + CLAHE) | Raw Ultrasound Scans | Preprocessing Lift
+-----------------+-------------------------+----------------------+--------------------
+Full AMFU-Net    | 0.8120 Dice (Exp-01)    | 0.8052 Dice (Exp-03) | +0.0068 (+0.68%)
+Plain U-Net      | 0.7823 Dice (Exp-02)    | 0.7793 Dice (Exp-04) | +0.0030 (+0.30%)
+-----------------+-------------------------+----------------------+--------------------
+Architecture Lift| +0.0297 (+2.97%)        | +0.0259 (+2.59%)     | Interaction: +0.0038
+
+Experiment Summary:
+1. Exp-01 (Full AMFU-Net on SRAD + CLAHE; 9,837,121 parameters):
+   - Metrics: 0.8120 Dice, 0.7134 Jaccard, 31.5510 px HD95, 9.2665 px ASD, 0.3073 Loss.
+   - Cohort Breakdown: BUS_BRA = 0.8310, BUS_UCLM = 0.8232, BUSI = 0.7539.
+
+2. Exp-02 (Plain U-Net on SRAD + CLAHE; 3,833,505 parameters; DAG & MFEF Disabled):
+   - Metrics: 0.7823 Dice, 0.6824 Jaccard, 41.3804 px HD95, 13.6121 px ASD, 0.3605 Loss.
+   - Cohort Breakdown: BUS_BRA = 0.8250, BUS_UCLM = 0.7083, BUSI = 0.6768.
+
+3. Exp-03 (Full AMFU-Net on Raw Ultrasound; 9,837,121 parameters; Preprocessing Bypassed):
+   - Metrics: 0.8052 Dice, 0.7081 Jaccard, 32.7928 px HD95, 9.5494 px ASD, 0.3203 Loss.
+   - Cohort Breakdown: BUS_BRA = 0.8250, BUS_UCLM = 0.8146, BUSI = 0.7452.
+
+4. Exp-04 (Plain U-Net on Raw Ultrasound; 3,833,505 parameters; Raw + No DAG/MFEF):
+   - Metrics: 0.7793 Dice, 0.6780 Jaccard, 40.6824 px HD95, 13.4097 px ASD, 0.3662 Loss.
+   - Cohort Breakdown: BUS_BRA = 0.8206, BUS_UCLM = 0.7167, BUSI = 0.6746.
+
+Core Findings:
+1. Architectural Dominance:
+   - AMFU-Net architectural modules (DAG, MFEF) account for over 80% of segmentation gain (+2.59% to +2.97% Dice, -9.83 px HD95 reduction).
+   - SRAD + CLAHE preprocessing provides consistent boundary refinement (+0.30% to +0.68% Dice, -1.24 px HD95).
+2. Interaction Dynamics:
+   - Gated skip connections in DAG amplify preprocessing gains (+0.68% vs +0.30% in ungated U-Net) by utilizing despeckled edge maps for spatial attention weighting.
+3. Cross-Domain Generalization:
+   - Plain U-Net degrades significantly on out-of-distribution cohorts (BUSI drops to ~0.67 Dice; BUS_UCLM HD95 increases to ~73.9 px).
+   - AMFU-Net maintains stability across multi-center scanners, achieving >0.74 Dice on BUSI and >0.81 Dice on BUS_UCLM.
+
+Decoupled Preprocessing Dataset Expansion
+
+A multi-threaded batch preprocessing pass was executed across all 2,637 cohort scans to decouple the two transformation stages and publish independent ablation modalities directly to Hugging Face (`Ahorts/G17-preprocessed-dataset`):
+
+Dataset Modalities Published:
+1. `image`: Full dual-stage enhancement (SRAD despeckled + CLAHE contrast equalized).
+2. `raw_image`: Unfiltered baseline ultrasound scan.
+3. `srad_image`: Speckle-reduced anisotropic diffusion alone (30 iterations, step 0.20, decay 0.125; no CLAHE).
+4. `clahe_image`: Contrast-limited adaptive histogram equalization alone (clip limit 2.0, grid 8x8; no SRAD diffusion).
+5. `mask`: Canonical binary lesion ground truth.
+
+Execution & Verification:
+- Parallel Processing: Completed across 16 worker processes in 133.30 seconds (~2.2 minutes).
+- Schema Verification: Parquet shards uploaded and verified across train (1,687), validation (423), and test (527) splits.
+- Geometry Integrity: Strict spatial identity confirmed across all 5 modalities (H x W dimensions match pixel-for-pixel).
+- Training Pipeline Update: `training/training_marimo.py` updated with `CFG.image_modality` supporting direct switching between "enhanced", "raw", "srad_only", and "clahe_only".
+
+
 Overall Project Progress
 
 What has been completed:
 - The original AMFU-Net paper has been understood.
 - The dataset limitation has been identified and justified.
 - A practical replacement for the fusion stage has been selected.
-- Public datasets have been chosen.
+- Public datasets have been chosen (BUSI, BUS-UCLM, BUS-BRA).
 - A preprocessing notebook has been implemented.
 - A training notebook has been implemented.
-- Session 5 explanation slides already exist for preprocessing, training, and demo.
+- Session 5 explanation slides prepared for preprocessing, training, and demo.
+- Session 6 interactive batch evaluation app completed and documented.
 
 Current project direction:
 We are not claiming to fully reproduce the original AMFU-Net paper, because the original fused USCT dataset is unavailable. Instead, we are adapting the AMFU-Net segmentation architecture to public single-modality breast ultrasound datasets, using SRAD and CLAHE preprocessing as the replacement for the unavailable fusion stage.
