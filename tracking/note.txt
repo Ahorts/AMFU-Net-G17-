@@ -216,19 +216,28 @@ Experiment Summary:
    - Cohort Breakdown: BUS_BRA = 0.8714 (87.14%, 16.90 px HD95), BUS_UCLM = 0.6996 (69.96%, 60.04 px HD95), BUSI = 0.7355 (73.55%, 42.66 px HD95).
    - The Crucial Insight (The Domain Collapse of Ungated MFEF): MFEF alone achieves the highest in-distribution score of all models on BUS_BRA (87.14% Dice and record 16.90 px HD95). However, without DAG attention gates along skip connections, the network suffers catastrophic domain collapse on external hospital cohort BUS_UCLM (collapsing to 69.96% Dice, 60.04 px HD95). DAG is essential for domain invariance!
 
+9. Exp-09 (Plain U-Net on CLAHE Alone; 3,833,505 parameters; DAG disabled, MFEF disabled; clahe_image):
+   - Metrics: 0.8004 Dice (80.04%), 0.7053 Jaccard (70.53%), 41.3035 px HD95, 12.8706 px ASD, 0.3361 Loss.
+   - Cohort Breakdown: BUS_BRA = 0.8471 (84.71%, 32.02 px HD95), BUS_UCLM = 0.7022 (70.22%, 77.03 px HD95), BUSI = 0.6895 (68.95%, 59.35 px HD95).
+   - Completing the 2x2 Architectural Factorial Bracket on CLAHE Alone:
+     * Plain U-Net baseline: 0.8004 Dice, 41.30 px HD95 (3.83M params).
+     * + DAG Alone: 0.8398 Dice (+3.94% lift), 27.52 px HD95 (-13.78 px reduction) at 6.19M params.
+     * + MFEF Alone: 0.8284 Dice (+2.80% lift), 25.69 px HD95 (-15.61 px reduction) at 16.68M params.
+     * + Both (Full AMFU): 0.8319 Dice (+3.15% lift), 26.18 px HD95 (-15.12 px reduction) at 19.03M params.
+   - Decoupled Preprocessing Baseline: Plain U-Net on CLAHE Alone (0.8004 Dice) outperforms Plain U-Net on SRAD+CLAHE (0.7823 Dice) by +1.81% and Plain U-Net on Raw (0.7793 Dice) by +2.11%, confirming CLAHE supremacy even without deep attention gating.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
-   - CLAHE Alone (82.84%–83.98% Dice) > SRAD + CLAHE (81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (80.52% Dice).
+   - CLAHE Alone (80.04%–83.98% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
 2. Architectural Module Hierarchy (on CLAHE Alone):
-   - U-Net + DAG (83.98% Dice, 6.19M params) > Full AMFU-Net (83.19% Dice, 19.03M params) > U-Net + MFEF (82.84% Dice, 16.68M params).
-   - In-Distribution Dominance vs Out-of-Distribution Collapse: MFEF specializes aggressively on the primary training domain (BUS_BRA = 87.14%), but DAG attention gating is strictly required to prevent out-of-distribution failure across hospital centers.
-   - AMFU-Net architectural modules (DAG, MFEF) account for over 80% of segmentation gain (+2.59% to +2.97% Dice, -9.83 px HD95 reduction).
-   - SRAD + CLAHE preprocessing provides consistent boundary refinement (+0.30% to +0.68% Dice, -1.24 px HD95).
+   - U-Net + DAG (83.98% Dice, 6.19M params) > Full AMFU-Net (83.19% Dice, 19.03M params) > U-Net + MFEF (82.84% Dice, 16.68M params) > Plain U-Net (80.04% Dice, 3.83M params).
+   - In-Distribution Dominance vs Out-of-Distribution Collapse: MFEF specializes aggressively on the primary training domain (BUS_BRA = 87.14%), but DAG attention gating is strictly required to prevent out-of-distribution failure across hospital centers (BUS_UCLM collapses to ~70% without DAG, but recovers to 81.09%–83.74% with DAG).
+   - DAG alone provides the highest parameter efficiency: +3.94% Dice lift over Plain U-Net while eliminating 12.85M parameters (-67.5% model size) compared to Full AMFU-Net.
 2. Interaction Dynamics:
-   - Gated skip connections in DAG amplify preprocessing gains (+0.68% vs +0.30% in ungated U-Net) by utilizing despeckled edge maps for spatial attention weighting.
+   - Gated skip connections in DAG amplify preprocessing gains by utilizing sharp contrast edge maps for spatial attention weighting.
 3. Cross-Domain Generalization:
-   - Plain U-Net degrades significantly on out-of-distribution cohorts (BUSI drops to ~0.67 Dice; BUS_UCLM HD95 increases to ~73.9 px).
-   - AMFU-Net maintains stability across multi-center scanners, achieving >0.74 Dice on BUSI and >0.81 Dice on BUS_UCLM.
+   - Plain U-Net degrades significantly on out-of-distribution cohorts (BUSI drops to 68.95% Dice; BUS_UCLM HD95 explodes to 77.03 px).
+   - AMFU-Net and U-Net+DAG maintain stability across multi-center scanners, achieving >74.5% Dice on BUSI and >81% Dice on BUS_UCLM.
 
 Decoupled Preprocessing Dataset Expansion
 
