@@ -168,7 +168,7 @@ Empirical evaluation conducted on an NVIDIA RTX 6000 Ada/Blackwell architecture 
 
 Benchmark Baseline Provenance:
 - Chen et al. (2026) Published Benchmark: 0.9142 Dice (Evaluated on private paired USCT reflection + transmission data; not handheld ultrasound).
-- Iteration 1 Proof-of-Concept Baseline: 0.7909 Dice, 0.3496 Loss (Initial adaptation on public handheld ultrasound, limited by FP32 computation and platform timeouts).
+- Session 5 Benchmark (Slide 15 Reference): 0.8173 Dice, 0.7252 Jaccard, 30.95 px HD95, 9.52 px ASD on 255 held-out test scans. (The 0.7909 Dice / 0.3496 Loss in model card metadata was the validation split plateau score).
 
 2x2 Factorial Ablation Matrix:
                  | Enhanced (SRAD + CLAHE) | Raw Ultrasound Scans | Preprocessing Lift
