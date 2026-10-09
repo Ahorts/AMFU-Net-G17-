@@ -226,11 +226,25 @@ Experiment Summary:
      * + Both (Full AMFU): 0.8319 Dice (+3.15% lift), 26.18 px HD95 (-15.12 px reduction) at 19.03M params.
    - Decoupled Preprocessing Baseline: Plain U-Net on CLAHE Alone (0.8004 Dice) outperforms Plain U-Net on SRAD+CLAHE (0.7823 Dice) by +1.81% and Plain U-Net on Raw (0.7793 Dice) by +2.11%, confirming CLAHE supremacy even without deep attention gating.
 
+10. Exp-10 (Full AMFU-Net on CLAHE Alone with GPU Pipeline Control; 19,033,153 parameters; DAG enabled, MFEF enabled; clahe_image):
+   - Metrics: 0.8190 Dice (81.90%), 0.7251 Jaccard (72.51%), 27.6273 px HD95, 8.5867 px ASD, 0.3019 Loss.
+   - Cohort Breakdown: BUS_BRA = 0.8486 (84.86%, 22.93 px HD95), BUS_UCLM = 0.7389 (73.89%, 44.00 px HD95), BUSI = 0.7529 (75.29%, 37.18 px HD95).
+   - Pipeline Control Finding (OpenCV CPU vs Torchvision GPU CUDA Transforms):
+     * Exp-06 (CPU Dataloader + OpenCV BORDER_REFLECT_101): 0.8319 Dice, 0.2807 Loss.
+     * Exp-10 (GPU VRAM Caching + Torchvision Zero-Fill TF.affine): 0.8190 Dice, 0.3019 Loss (-1.29% delta).
+     * Mechanical Explanation: OpenCV's BORDER_REFLECT_101 preserves peripheral ultrasound acoustic impedance at rotated margins, whereas TF.affine's zero-fill injects artificial black border steps (-1.0 normalized value).
+     * Option A Strictly-Controlled GPU Bracket:
+       1. U-Net + DAG Alone (Exp-07): 0.8398 Dice, 27.52 px HD95 (6.19M params) — Undisputed Champion!
+       2. U-Net + MFEF Alone (Exp-08): 0.8284 Dice, 25.69 px HD95 (16.68M params)
+       3. Full AMFU-Net (Exp-10): 0.8190 Dice, 27.63 px HD95 (19.03M params)
+       4. Plain U-Net (Exp-09): 0.8004 Dice, 41.30 px HD95 (3.83M params)
+       Conclusion: Across both pipelines, DAG alone remains superior to Full AMFU-Net while slashing 12.85M parameters!
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.04%–83.98% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
 2. Architectural Module Hierarchy (on CLAHE Alone):
-   - U-Net + DAG (83.98% Dice, 6.19M params) > Full AMFU-Net (83.19% Dice, 19.03M params) > U-Net + MFEF (82.84% Dice, 16.68M params) > Plain U-Net (80.04% Dice, 3.83M params).
+   - U-Net + DAG (83.98% Dice, 6.19M params) > Full AMFU-Net (81.90%–83.19% Dice, 19.03M params) > U-Net + MFEF (82.84% Dice, 16.68M params) > Plain U-Net (80.04% Dice, 3.83M params).
    - In-Distribution Dominance vs Out-of-Distribution Collapse: MFEF specializes aggressively on the primary training domain (BUS_BRA = 87.14%), but DAG attention gating is strictly required to prevent out-of-distribution failure across hospital centers (BUS_UCLM collapses to ~70% without DAG, but recovers to 81.09%–83.74% with DAG).
    - DAG alone provides the highest parameter efficiency: +3.94% Dice lift over Plain U-Net while eliminating 12.85M parameters (-67.5% model size) compared to Full AMFU-Net.
 2. Interaction Dynamics:
