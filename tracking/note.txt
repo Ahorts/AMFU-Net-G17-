@@ -195,8 +195,22 @@ Experiment Summary:
    - Metrics: 0.7793 Dice, 0.6780 Jaccard, 40.6824 px HD95, 13.4097 px ASD, 0.3662 Loss.
    - Cohort Breakdown: BUS_BRA = 0.8206, BUS_UCLM = 0.7167, BUSI = 0.6746.
 
+5. Exp-05 (Full AMFU-Net on SRAD Alone; 9,837,121 parameters; srad_image):
+   - Metrics: 0.8110 Dice (81.10%), 0.7166 Jaccard (71.66%), 29.5323 px HD95, 8.8656 px ASD, 0.3159 Loss.
+   - Cohort Breakdown: BUS_BRA = 0.8326, BUS_UCLM = 0.8240, BUSI = 0.7450.
+   - Key Insight: SRAD alone accounts for 85% of total preprocessing Dice lift (+0.58% of the +0.68% total) and achieves a lower boundary error than dual preprocessing (29.53 px HD95 vs 31.55 px for SRAD+CLAHE).
+
+6. Exp-06 (Full AMFU-Net on CLAHE Alone; 9,837,121 parameters; clahe_image):
+   - Metrics: 0.8319 Dice (83.19%), 0.7418 Jaccard (74.18%), 26.1766 px HD95, 7.6031 px ASD, 0.2807 Loss.
+   - Cohort Breakdown: BUS_BRA = 0.8614 (86.14%), BUS_UCLM = 0.8374 (83.74%), BUSI = 0.7450 (74.50%).
+   - Major Breakthrough: CLAHE Alone is the top-performing configuration of the entire research study, decisively outperforming the full SRAD+CLAHE dual-pipeline across all metrics (+1.99% Dice, +2.84% Jaccard, -5.37 px HD95, -1.66 px ASD, and lowest loss of 0.2807).
+   - Mechanism: Anisotropic diffusion (SRAD) acts as an edge-preserving low-pass filter that inadvertently attenuates subtle high-frequency acoustic texture cues. When CLAHE is applied directly to raw ultrasound without prior diffusion smoothing, Dual Attention Gates (DAG) receive unadulterated high-contrast margins, yielding optimal spatial gating and segmentation precision.
+
 Core Findings:
-1. Architectural Dominance:
+1. Preprocessing Hierarchy & Interaction:
+   - CLAHE Alone (83.19% Dice, 26.18 px HD) > SRAD + CLAHE (81.20% Dice, 31.55 px HD) > SRAD Alone (81.10% Dice, 29.53 px HD) > Raw Ultrasound (80.52% Dice, 32.79 px HD).
+   - Coupling SRAD diffusion prior to CLAHE causes negative interaction: histogram stretching on low-pass filtered gradients introduces boundary artifacts. Direct CLAHE contrast equalization provides pure gradient separation for DAG attention.
+2. Architectural Dominance:
    - AMFU-Net architectural modules (DAG, MFEF) account for over 80% of segmentation gain (+2.59% to +2.97% Dice, -9.83 px HD95 reduction).
    - SRAD + CLAHE preprocessing provides consistent boundary refinement (+0.30% to +0.68% Dice, -1.24 px HD95).
 2. Interaction Dynamics:

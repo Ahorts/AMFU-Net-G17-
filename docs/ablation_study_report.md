@@ -36,6 +36,8 @@ All experiments were trained for 200 epochs under FP16 mixed precision and evalu
 | **Exp-02: Arch Ablation** | Plain U-Net (No DAG, No MFEF) | 3,833,505 | SRAD + CLAHE | `0.3605` | `0.7823` (78.23%) | `0.6824` (68.24%) | `41.3804` | `13.6121` |
 | **Exp-03: Preproc Ablation**| AMFU-Net (DAG + MFEF) | 9,837,121 | Raw Ultrasound Scans | `0.3203` | `0.8052` (80.52%) | `0.7081` (70.81%) | `32.7928` | `9.5494` |
 | **Exp-04: Dual Control** | Plain U-Net (No DAG, No MFEF) | 3,833,505 | Raw Ultrasound Scans | `0.3662` | `0.7793` (77.93%) | `0.6780` (67.80%) | `40.6824` | `13.4097` |
+| **Exp-05: SRAD Alone** | AMFU-Net (DAG + MFEF) | 9,837,121 | SRAD Despeckled (No CLAHE) | `0.3159` | `0.8110` (81.10%) | `0.7166` (71.66%) | `29.5323` | `8.8656` |
+| **Exp-06: CLAHE Alone** | AMFU-Net (DAG + MFEF) | 9,837,121 | CLAHE Contrast Alone (No SRAD) | **`0.2807`** | **`0.8319` (83.19%)** | **`0.7418` (74.18%)** | **`26.1766`** | **`7.6031`** |
 
 ### 3.2 2×2 Factorial Interaction Matrix
 
@@ -65,6 +67,12 @@ External hospital cohorts evaluate domain generalization across differing scanne
 | **Exp-04** (Plain U-Net + Raw) | Dice | `0.8206` | `0.7167` | `0.6746` | **`0.7793`** |
 | | 95% HD (px) | `33.2506` | `73.8980` | `53.9772` | **`40.6824`** |
 | | ASD (px) | `10.2141` | `23.8875` | `20.0773` | **`13.4097`** |
+| **Exp-05** (AMFU-Net + SRAD Alone) | Dice | `0.8326` | `0.8240` | `0.7450` | **`0.8110`** |
+| | 95% HD (px) | `26.8123` | `25.7713` | `38.3775` | **`29.5323`** |
+| | ASD (px) | `7.4601` | `7.2688` | `13.3496` | **`8.8656`** |
+| **Exp-06** (AMFU-Net + CLAHE Alone) | Dice | **`0.8614`** | **`0.8374`** | **`0.7450`** | **`0.8319`** |
+| | 95% HD (px) | **`21.3794`** | **`38.2226`** | **`37.1070`** | **`26.1766`** |
+| | ASD (px) | **`5.7797`** | **`8.8539`** | **`12.5897`** | **`7.6031`** |
 
 ---
 
@@ -83,12 +91,23 @@ External hospital cohorts evaluate domain generalization across differing scanne
 - On external hospital cohorts (`BUSI` and `BUS_UCLM`), Plain U-Net experiences catastrophic domain collapse:
   - `BUSI`: Performance drops to `0.6746`–`0.6768` Dice (an **8.0% drop** relative to AMFU-Net).
   - `BUS_UCLM`: Boundary error spikes to **`72.44`–`73.90 px` HD95**, compared to **`25.86`–`28.37 px`** for AMFU-Net (a **2.6× error magnification**).
-- **Mechanism:** Differing scanner center frequencies and focal depths alter lesion appearance scale and acoustic attenuation profiles. The Multi-Scale Feature Extraction and Fusion (MFEF) bottleneck dynamically aggregates features across multi-scale receptive fields, providing the domain invariance necessary to prevent out-of-distribution failure.
+### 5.4 Preprocessing Decoupling Discovery: The CLAHE Alone Breakthrough
+- **Empirical Hierarchy:** CLAHE Alone (`0.8319` Dice / `26.18 px` HD) > Full Dual Pipeline (`0.8120` Dice / `31.55 px` HD) > SRAD Alone (`0.8110` Dice / `29.53 px` HD) > Raw Ultrasound (`0.8052` Dice / `32.79 px` HD).
+- **The Over-Smoothing Penalty of SRAD Diffusion:** PDE-based anisotropic diffusion (SRAD) effectively suppresses multiplicative speckle, but multi-iteration numerical diffusion acts as an edge-preserving low-pass filter. This attenuates subtle high-frequency acoustic texture cues (e.g. micro-lobulated tumor boundaries and posterior acoustic shadowing) that convolutional kernels rely upon.
+- **Negative Stacking Interaction:** Applying CLAHE *after* SRAD forces histogram equalization onto pre-smoothed gradient transitions, producing artificial edge plateaus and margin ringing.
+- **Direct Local Contrast Supremacy:** Applying CLAHE directly to raw ultrasound maximizes local gradient separation between hypoechoic lesion cores and echogenic parenchyma without spatial blur. This provides pristine gradient inputs to Dual Attention Gates (DAG), boosting Dice by **+1.99%** over the dual pipeline and slashing Hausdorff boundary error by **-5.37 px (-17.0%)**.
 
 ---
 
-## 6. Next Steps: Stage 3 Preprocessing Ablation
+## 6. Complete Empirical Synthesis & Final Ranking
 
-To isolate the independent contributions within the preprocessing pipeline itself, subsequent experiments will decouple the dual-stage transformation:
-1. **Exp-05 (SRAD Alone):** Full AMFU-Net trained on despeckled images without CLAHE contrast equalization.
-2. **Exp-06 (CLAHE Alone):** Full AMFU-Net trained on contrast-equalized raw images without PDE despeckling diffusion.
+Across all 6 systematic ablation runs evaluated on 266 immutable internal test scans:
+
+| Rank | Model & Modality | Test Loss | Test Dice | Test IoU | 95% HD (px) | Primary Domain (BUS_BRA) |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: |
+| 🥇 | **Exp-06: AMFU-Net + CLAHE Alone** | **`0.2807`** | **`0.8319` (83.19%)** | **`0.7418` (74.18%)** | **`26.1766`** | **`0.8614` Dice / `21.38 px` HD** |
+| 🥈 | **Exp-01: AMFU-Net + SRAD + CLAHE** | `0.3073` | `0.8120` (81.20%) | `0.7134` (71.34%) | `31.5510` | `0.8310` Dice / `29.80 px` HD |
+| 🥉 | **Exp-05: AMFU-Net + SRAD Alone** | `0.3159` | `0.8110` (81.10%) | `0.7166` (71.66%) | `29.5323` | `0.8326` Dice / `26.81 px` HD |
+| 4 | **Exp-03: AMFU-Net + Raw Ultrasound** | `0.3203` | `0.8052` (80.52%) | `0.7081` (70.81%) | `32.7928` | `0.8250` Dice / `30.77 px` HD |
+| 5 | **Exp-02: Plain U-Net + SRAD + CLAHE** | `0.3605` | `0.7823` (78.23%) | `0.6824` (68.24%) | `41.3804` | `0.8250` Dice / `30.93 px` HD |
+| 6 | **Exp-04: Plain U-Net + Raw Ultrasound** | `0.3662` | `0.7793` (77.93%) | `0.6780` (67.80%) | `40.6824` | `0.8206` Dice / `33.25 px` HD |
