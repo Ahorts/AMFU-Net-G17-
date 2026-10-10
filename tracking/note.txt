@@ -240,6 +240,20 @@ Experiment Summary:
        4. Plain U-Net (Exp-09): 0.8004 Dice, 41.30 px HD95 (3.83M params)
        Conclusion: Across both pipelines, DAG alone remains superior to Full AMFU-Net while slashing 12.85M parameters!
 
+11. Exp-11 (Full AMFU-Net on CLAHE Alone with GPU Reflection Padding; 19,033,153 parameters; DAG enabled, MFEF enabled; clahe_image):
+   - Metrics: 0.8234 Dice (82.34%), 0.7338 Jaccard (73.38%), 25.5712 px HD95 (Record Low Boundary Error for Full AMFU!), 7.7219 px ASD, 0.2967 Loss.
+   - Cohort Breakdown: BUS_BRA = 0.8498 (84.98%, 21.95 px HD95), BUS_UCLM = 0.8406 (84.06%, 25.37 px HD95), BUSI = 0.7420 (74.20%, 36.15 px HD95).
+   - Reflection Padding Hypothesis Verified:
+     * Restoring 96px GPU reflection padding (eliminating black corner steps) recovered +0.44% Dice and +0.87% IoU over Exp-10, dropping test loss from 0.3019 to 0.2967.
+     * External Center BUS_UCLM surged from 73.89% (Exp-10 zero-fill) back to 84.06% (+10.17% lift), slashing HD95 from 44.00 px to 25.37 px (-18.63 px error reduction).
+     * Set a new study record for Full AMFU boundary localization: 25.57 px HD95 (beating Exp-06 CPU 26.18 px and Exp-10 GPU 27.63 px).
+     * Pure GPU Controlled Hierarchy:
+       1. U-Net + DAG Alone (Exp-07): 0.8398 Dice, 27.52 px HD95 (6.19M params) — Beats Full AMFU by +1.64% with 67.5% fewer parameters!
+       2. U-Net + MFEF Alone (Exp-08): 0.8284 Dice, 25.69 px HD95 (16.68M params)
+       3. Full AMFU-Net (Exp-11, GPU Reflection): 0.8234 Dice, 25.57 px HD95 (19.03M params)
+       4. Full AMFU-Net (Exp-10, GPU Zero-Fill): 0.8190 Dice, 27.63 px HD95 (19.03M params)
+       5. Plain U-Net Baseline (Exp-09): 0.8004 Dice, 41.30 px HD95 (3.83M params)
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.04%–83.98% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
