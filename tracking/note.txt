@@ -264,13 +264,27 @@ Experiment Summary:
      * External Center Domain Collapse: Without DAG attention gates along skip connections, MFEF collapses on external hospital cohort BUS_UCLM (70.80% Dice, 54.44 px HD95), compared to U-Net + DAG which achieved 84.87% Dice and 36.74 px HD95 (+14.07% higher Dice).
      * Conclusion: DAG is strictly required for cross-center domain invariance. MFEF alone is an in-distribution overfit machine.
 
+14. Exp-14 (Plain U-Net Baseline on CLAHE Alone with GPU Reflection Padding; 3,828,289 parameters; DAG disabled, MFEF disabled; clahe_image):
+   - Metrics: 0.8003 Dice (80.03%), 0.7065 Jaccard (70.65%), 36.8169 px HD95, 11.0338 px ASD, 0.3326 Loss.
+   - Cohort Breakdown: BUS_BRA = 0.8435 (84.35%, 25.15 px HD95, 6.56 px ASD), BUS_UCLM = 0.7422 (74.22%, 75.10 px HD95, 23.53 px ASD), BUSI = 0.6893 (68.93%, 61.15 px HD95, 20.93 px ASD).
+   - Definitive GPU Reflection Architectural Ablation Bracket (All on CLAHE with GPU Reflection Padding):
+     1. U-Net + DAG (Exp-12, Winner): 0.8368 Dice, 0.7505 IoU, 24.60 px HD95, 7.15 px ASD, 0.2741 Loss (6.19M params)
+     2. U-Net + MFEF (Exp-13): 0.8268 Dice, 0.7447 IoU, 21.78 px HD95, 7.66 px ASD, 0.2812 Loss (16.68M params)
+     3. Full AMFU-Net (Exp-11): 0.8234 Dice, 0.7338 IoU, 25.57 px HD95, 7.72 px ASD, 0.2967 Loss (19.03M params)
+     4. Plain U-Net (Exp-14): 0.8003 Dice, 0.7065 IoU, 36.82 px HD95, 11.03 px ASD, 0.3326 Loss (3.83M params)
+   - Architectural Takeaways:
+     * DAG Alone provides +3.65% Dice, +4.40% IoU, and slashes boundary error by -12.21 px HD95 and -3.89 px ASD over Plain U-Net.
+     * MFEF Alone provides strong in-distribution feature extraction (+2.65% Dice, record 21.78 px HD95), but suffers catastrophic domain collapse on external centers (BUS_UCLM collapses to 70.80% Dice, 54.44 px HD95).
+     * Dual Attention Gating (DAG) is the critical multi-center regularizer: prevents collapse on BUS_UCLM (84.87% Dice) and BUSI (73.91% Dice).
+     * Combining both (Full AMFU-Net) suffers from parameter bloat (19.03M params) and slightly overfits compared to U-Net + DAG alone (6.19M params).
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
-   - CLAHE Alone (80.04%–83.98% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
-2. Architectural Module Hierarchy (on CLAHE Alone):
-   - U-Net + DAG (83.98% Dice, 6.19M params) > Full AMFU-Net (81.90%–83.19% Dice, 19.03M params) > U-Net + MFEF (82.84% Dice, 16.68M params) > Plain U-Net (80.04% Dice, 3.83M params).
-   - In-Distribution Dominance vs Out-of-Distribution Collapse: MFEF specializes aggressively on the primary training domain (BUS_BRA = 87.14%), but DAG attention gating is strictly required to prevent out-of-distribution failure across hospital centers (BUS_UCLM collapses to ~70% without DAG, but recovers to 81.09%–83.74% with DAG).
-   - DAG alone provides the highest parameter efficiency: +3.94% Dice lift over Plain U-Net while eliminating 12.85M parameters (-67.5% model size) compared to Full AMFU-Net.
+   - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
+2. Architectural Module Hierarchy (on CLAHE Alone with Verified GPU Reflection Padding):
+   - U-Net + DAG (Exp-12: 83.68% Dice, 6.19M params) > U-Net + MFEF (Exp-13: 82.68% Dice, 16.68M params) > Full AMFU-Net (Exp-11: 82.34% Dice, 19.03M params) > Plain U-Net (Exp-14: 80.03% Dice, 3.83M params).
+   - In-Distribution Dominance vs Out-of-Distribution Collapse: MFEF specializes aggressively on the primary training domain (BUS_BRA = 86.93%, 13.67 px HD95), but DAG attention gating is strictly required to prevent out-of-distribution failure across hospital centers (BUS_UCLM collapses to 70.80% without DAG, but recovers to 84.87% with DAG).
+   - DAG alone provides the highest parameter efficiency: +3.65% Dice lift over Plain U-Net while eliminating 12.85M parameters (-67.5% model size) compared to Full AMFU-Net.
 2. Interaction Dynamics:
    - Gated skip connections in DAG amplify preprocessing gains by utilizing sharp contrast edge maps for spatial attention weighting.
 3. Cross-Domain Generalization:
