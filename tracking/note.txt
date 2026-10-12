@@ -328,6 +328,20 @@ Experiment Summary:
      * Raw Ultrasound Architecture Comparison: U-Net + DAG alone (Exp-16: 85.19% Dice, 20.72 px HD95, 0.2580 loss, 6.19M params) crushes Full AMFU-Net (Exp-19: 83.58% Dice, 25.38 px HD95, 0.2869 loss, 19.03M params) by +1.61% Dice, -4.66 px lower HD95, and -0.0289 lower loss, while using 67.5% fewer parameters!
      * Universal Conclusion: Across both image modalities (Raw and CLAHE) and across both scheduler regimes (StepLR and Cosine Annealing), U-Net + DAG consistently outperforms Full AMFU-Net by +1.61% to +1.67% Dice. The MFEF bottleneck module is conclusively proven to be detrimental on 2D single-modality ultrasound.
 
+20. Exp-20 (Full AMFU-Net on SRAD Alone with Cosine Annealing; 19,033,409 parameters; DAG enabled, MFEF enabled; srad_image; CosineAnnealingLR eta_min=1e-5):
+   - Metrics: 0.8212 Dice (82.12%), 0.7261 Jaccard (72.61%), 28.8731 px HD95, 8.5800 px ASD, 0.2983 Loss.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8373 (83.73%, 26.4961 px HD95, 7.4577 px ASD)
+     * BUS_UCLM = 0.7890 (78.90%, 26.6698 px HD95, 8.1613 px ASD)
+     * BUSI = 0.7825 (78.25%, 36.3323 px HD95, 11.9464 px ASD)
+   - Preprocessing Hierarchy on Full AMFU-Net under Cosine Annealing:
+     * Complete Preprocessing Triad on Full AMFU:
+       1. Raw Ultrasound (Exp-19): 0.8358 Dice, 0.7476 IoU, 25.38 px HD95, 7.36 px ASD, 0.2869 Loss
+       2. CLAHE Alone (Exp-18): 0.8248 Dice, 0.7347 IoU, 25.02 px HD95, 7.58 px ASD, 0.3002 Loss
+       3. SRAD Alone (Exp-20): 0.8212 Dice, 0.7261 IoU, 28.87 px HD95, 8.58 px ASD, 0.2983 Loss
+     * The Over-Smoothing Penalty: Multi-iteration anisotropic diffusion (SRAD) removes natural speckle texture cues, resulting in the worst boundary localization (28.87 px HD95, +3.49 px worse than Raw) and the lowest Dice on the primary training cohort BUS_BRA (83.73% vs 85.96% on Raw).
+     * Final Preprocessing Law: Raw Ultrasound > CLAHE Alone > SRAD Alone on 2D convolutional segmentation models.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
