@@ -342,6 +342,22 @@ Experiment Summary:
      * The Over-Smoothing Penalty: Multi-iteration anisotropic diffusion (SRAD) removes natural speckle texture cues, resulting in the worst boundary localization (28.87 px HD95, +3.49 px worse than Raw) and the lowest Dice on the primary training cohort BUS_BRA (83.73% vs 85.96% on Raw).
      * Final Preprocessing Law: Raw Ultrasound > CLAHE Alone > SRAD Alone on 2D convolutional segmentation models.
 
+21. Exp-21 (Full AMFU-Net on Enhanced [SRAD + CLAHE] with Cosine Annealing; 19,033,409 parameters; DAG enabled, MFEF enabled; image; CosineAnnealingLR eta_min=1e-5):
+   - Metrics: 0.8151 Dice (81.51%), 0.7177 Jaccard (71.77%), 28.9271 px HD95, 8.5304 px ASD, 0.3122 Loss.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8289 (82.89%, 27.3012 px HD95, 7.6401 px ASD)
+     * BUS_UCLM = 0.8645 (86.45%, 24.0174 px HD95, 5.8341 px ASD)
+     * BUSI = 0.7626 (76.26%, 34.8798 px HD95, 11.7918 px ASD)
+   - Definitive 4-Way Modality Hierarchy on Full AMFU-Net under Cosine Annealing:
+     1. Raw Ultrasound (Exp-19): 0.8358 Dice, 0.7476 IoU, 25.38 px HD95, 7.36 px ASD, 0.2869 Loss
+     2. CLAHE Alone (Exp-18): 0.8248 Dice, 0.7347 IoU, 25.02 px HD95, 7.58 px ASD, 0.3002 Loss
+     3. SRAD Alone (Exp-20): 0.8212 Dice, 0.7261 IoU, 28.87 px HD95, 8.58 px ASD, 0.2983 Loss
+     4. Enhanced [SRAD + CLAHE] (Exp-21): 0.8151 Dice, 0.7177 IoU, 28.93 px HD95, 8.53 px ASD, 0.3122 Loss
+   - Definitive Preprocessing Law:
+     * The dual-stage enhancement pipeline designed to replace fusion is the WORST performing configuration (81.51% Dice, 0.3122 loss).
+     * Compounding Penalty: SRAD pre-smooths acoustic tissue transitions, and subsequent CLAHE amplifies artificial gradient plateaus.
+     * Pure unenhanced Raw Ultrasound outperforms all hand-engineered classical filtering pipelines.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).

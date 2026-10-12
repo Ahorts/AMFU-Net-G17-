@@ -190,6 +190,16 @@ To isolate PDE-based anisotropic diffusion under non-freezing optimization, Full
 - **The Over-Smoothing Boundary Penalty:** SRAD Alone yielded the worst boundary localization (**`28.8731 px` HD95**, $+3.49\text{ px}$ worse than Raw) and highest surface error (**`8.5800 px` ASD**, $+1.22\text{ px}$ worse than Raw). On primary training cohort `BUS_BRA`, Dice dropped to **`83.73%`** (compared to `85.96%` on Raw and `85.39%` on CLAHE).
 - **Physical Ultrasound Grounding:** Non-linear anisotropic diffusion over 30 numerical PDE iterations attenuates subtle high-frequency acoustic speckle transitions. Lesion boundary transitions and acoustic shadowing cues are blurred, directly harming convolutional margin localization.
 
+### 5.14 The Complete 4-Modality Matrix on Full AMFU-Net: The Classical Preprocessing Penalty (Exp-21)
+To close the complete $4 \times 1$ modality matrix on Full AMFU-Net under identical optimization (`CosineAnnealingLR`, $\eta_{\max}=10^{-3} \to \eta_{\min}=10^{-5}$), Full AMFU-Net was trained on the dual-enhanced pipeline (`image`: SRAD + CLAHE stacked):
+- **Definitive 4-Way Modality Ranking:**
+  1. **Raw Ultrasound (Exp-19):** **`0.8358` (83.58%) Dice**, **`0.7476` IoU**, **`25.38 px` HD95**, **`0.2869` Loss**
+  2. **CLAHE Alone (Exp-18):** `0.8248` (82.48%) Dice, `0.7347` IoU, **`25.02 px` HD95**, `0.3002` Loss
+  3. **SRAD Alone (Exp-20):** `0.8212` (82.12%) Dice, `0.7261` IoU, `28.87 px` HD95, `0.2983` Loss
+  4. **Dual Enhanced SRAD+CLAHE (Exp-21):** `0.8151` (81.51%) Dice, `0.7177` IoU, `28.93 px` HD95, `0.3122` Loss
+- **The Compounding Preprocessing Penalty:** Stacking classical preprocessing transformations produces a monotonically decreasing performance curve. SRAD PDE diffusion over-smooths acoustic margin transitions, and subsequent CLAHE contrast stretching equalizes artificial transition plateaus, amplifying boundary uncertainty.
+- **Architectural Takeaway:** Deep convolutional segmentation models learn optimal acoustic feature filters directly from raw radio-frequency backscatter distributions; classical hand-engineered digital image processing destroys spatial frequency cues rather than enhancing them.
+
 ---
 
 ## 6. Complete Empirical Synthesis & Final Ranking
@@ -208,12 +218,14 @@ Across all systematic ablation runs evaluated on 266 immutable internal test sca
 | 8 | **Exp-18: Full AMFU-Net + CLAHE + Cosine** | 19.03M | GPU Reflect | `0.3002` | `0.8248` (82.48%) | `0.7347` (73.47%) | `25.0171` | `0.8539` Dice / `21.56 px` HD |
 | 9 | **Exp-11: Full AMFU-Net + CLAHE** | 19.03M | GPU Reflect | `0.2967` | `0.8234` (82.34%) | `0.7338` (73.38%) | `25.5712` | `0.8498` Dice / `21.95 px` HD |
 | 10 | **Exp-20: Full AMFU-Net + SRAD Alone + Cosine** | 19.03M | GPU Reflect | `0.2983` | `0.8212` (82.12%) | `0.7261` (72.61%) | `28.8731` | `0.8373` Dice / `26.50 px` HD |
-| 11 | **Exp-01: Full AMFU-Net + SRAD + CLAHE** | 19.03M | CPU OpenCV | `0.3073` | `0.8120` (81.20%) | `0.7134` (71.34%) | `31.5510` | `0.8310` Dice / `29.80 px` HD |
-| 12 | **Exp-05: Full AMFU-Net + SRAD Alone** | 19.03M | CPU OpenCV | `0.3159` | `0.8110` (81.10%) | `0.7166` (71.66%) | `29.5323` | `0.8326` Dice / `26.81 px` HD |
-| 13 | **Exp-03: Full AMFU-Net + Raw Ultrasound** | 19.03M | CPU OpenCV | `0.3203` | `0.8052` (80.52%) | `0.7081` (70.81%) | `32.7928` | `0.8250` Dice / `30.77 px` HD |
-| 14 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `0.8003` (80.03%) | `0.7065` (70.65%) | `36.8169` | `0.8435` Dice / `25.15 px` HD |
-| 15 | **Exp-02: Plain U-Net + SRAD + CLAHE** | 3.83M | CPU OpenCV | `0.3605` | `0.7823` (78.23%) | `0.6824` (68.24%) | `41.3804` | `0.8250` Dice / `30.93 px` HD |
-| 16 | **Exp-04: Plain U-Net + Raw Ultrasound** | 3.83M | CPU OpenCV | `0.3662` | `0.7793` (77.93%) | `0.6780` (67.80%) | `40.6824` | `0.8206` Dice / `33.25 px` HD |
+| 11 | **Exp-21: Full AMFU-Net + Enhanced + Cosine** | 19.03M | GPU Reflect | `0.3122` | `0.8151` (81.51%) | `0.7177` (71.77%) | `28.9271` | `0.8289` Dice / `27.30 px` HD |
+| 12 | **Exp-01: Full AMFU-Net + SRAD + CLAHE** | 19.03M | CPU OpenCV | `0.3073` | `0.8120` (81.20%) | `0.7134` (71.34%) | `31.5510` | `0.8310` Dice / `29.80 px` HD |
+| 13 | **Exp-05: Full AMFU-Net + SRAD Alone** | 19.03M | CPU OpenCV | `0.3159` | `0.8110` (81.10%) | `0.7166` (71.66%) | `29.5323` | `0.8326` Dice / `26.81 px` HD |
+| 14 | **Exp-03: Full AMFU-Net + Raw Ultrasound** | 19.03M | CPU OpenCV | `0.3203` | `0.8052` (80.52%) | `0.7081` (70.81%) | `32.7928` | `0.8250` Dice / `30.77 px` HD |
+| 15 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `0.8003` (80.03%) | `0.7065` (70.65%) | `36.8169` | `0.8435` Dice / `25.15 px` HD |
+| 16 | **Exp-02: Plain U-Net + SRAD + CLAHE** | 3.83M | CPU OpenCV | `0.3605` | `0.7823` (78.23%) | `0.6824` (68.24%) | `41.3804` | `0.8250` Dice / `30.93 px` HD |
+| 17 | **Exp-04: Plain U-Net + Raw Ultrasound** | 3.83M | CPU OpenCV | `0.3662` | `0.7793` (77.93%) | `0.6780` (67.80%) | `40.6824` | `0.8206` Dice / `33.25 px` HD |
+
 
 
 
