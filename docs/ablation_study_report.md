@@ -171,6 +171,12 @@ To determine if CLAHE Alone could close the gap with Raw Ultrasound under non-fr
 - **The Modality Hierarchy Under Modern Annealing:** While Cosine Annealing improved CLAHE, **Raw Ultrasound + Cosine (Exp-16: `0.8519` Dice / `20.72 px` HD95) decisively outperforms CLAHE + Cosine (Exp-17: `0.8415` Dice / `23.62 px` HD95)** by **+1.04% Dice** and **-2.90 px lower boundary error**.
 - **Acoustic Insight:** Dual Attention Gates (DAG) thrive on native speckle-boundary transitions. Artificial histogram equalization (CLAHE) distorts the micro-textural margin gradients that DAG spatial attention weights rely upon.
 
+### 5.11 Architectural Inefficiency Confirmed: Full AMFU-Net on CLAHE with Cosine Annealing (Exp-18)
+To definitively establish whether MFEF multi-scale bottleneck pooling adds value under continuous learning rate annealing, Full AMFU-Net (`19.03M` params) was trained on CLAHE Alone with `CosineAnnealingLR`:
+- **Underperformance vs U-Net + DAG:** Full AMFU-Net achieved **`0.8248` (82.48%) Dice** and **`25.0171 px` HD95**, trailing U-Net + DAG (Exp-17: `0.8415` Dice / `23.62 px` HD95) by **-1.67% Dice** and **-2.17% IoU** despite having 3.1× more parameters (`19.03M` vs `6.19M`).
+- **External Domain Collapse:** On out-of-distribution external hospital cohort `BUS_UCLM`, Full AMFU-Net collapsed to **`78.64%` Dice** (`42.05 px` HD95), whereas U-Net + DAG maintained **`85.88%` Dice** (`33.27 px` HD95)—a **-7.24% gap**.
+- **Architectural Verdict:** MFEF multi-scale dilated convolutions at the $16 \times 16$ bottleneck introduce excessive capacity that overfits the primary scanner domain, degrading multi-center boundary localization regardless of learning rate schedule.
+
 ---
 
 ## 6. Complete Empirical Synthesis & Final Ranking
@@ -185,11 +191,13 @@ Across all systematic ablation runs evaluated on 266 immutable internal test sca
 | 4 | **Exp-12: U-Net + DAG (No MFEF) + CLAHE** | **6.19M** | GPU Reflect | `0.2741` | `0.8368` (83.68%) | `0.7505` (75.05%) | `24.6045` | `0.8694` Dice / `18.38 px` HD |
 | 5 | **Exp-06: Full AMFU-Net + CLAHE Alone** | 19.03M | CPU OpenCV | `0.2807` | `0.8319` (83.19%) | `0.7418` (74.18%) | `26.1766` | `0.8614` Dice / `21.38 px` HD |
 | 6 | **Exp-13: U-Net + MFEF (No DAG) + CLAHE** | 16.68M | GPU Reflect | `0.2812` | `0.8268` (82.68%) | `0.7447` (74.47%) | `21.7793` | `0.8693` Dice / `13.67 px` HD |
-| 7 | **Exp-11: Full AMFU-Net + CLAHE** | 19.03M | GPU Reflect | `0.2967` | `0.8234` (82.34%) | `0.7338` (73.38%) | `25.5712` | `0.8498` Dice / `21.95 px` HD |
-| 8 | **Exp-01: Full AMFU-Net + SRAD + CLAHE** | 19.03M | CPU OpenCV | `0.3073` | `0.8120` (81.20%) | `0.7134` (71.34%) | `31.5510` | `0.8310` Dice / `29.80 px` HD |
-| 9 | **Exp-05: Full AMFU-Net + SRAD Alone** | 19.03M | CPU OpenCV | `0.3159` | `0.8110` (81.10%) | `0.7166` (71.66%) | `29.5323` | `0.8326` Dice / `26.81 px` HD |
-| 10 | **Exp-03: Full AMFU-Net + Raw Ultrasound** | 19.03M | CPU OpenCV | `0.3203` | `0.8052` (80.52%) | `0.7081` (70.81%) | `32.7928` | `0.8250` Dice / `30.77 px` HD |
-| 11 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `0.8003` (80.03%) | `0.7065` (70.65%) | `36.8169` | `0.8435` Dice / `25.15 px` HD |
-| 12 | **Exp-02: Plain U-Net + SRAD + CLAHE** | 3.83M | CPU OpenCV | `0.3605` | `0.7823` (78.23%) | `0.6824` (68.24%) | `41.3804` | `0.8250` Dice / `30.93 px` HD |
-| 13 | **Exp-04: Plain U-Net + Raw Ultrasound** | 3.83M | CPU OpenCV | `0.3662` | `0.7793` (77.93%) | `0.6780` (67.80%) | `40.6824` | `0.8206` Dice / `33.25 px` HD |
+| 7 | **Exp-18: Full AMFU-Net + CLAHE + Cosine** | 19.03M | GPU Reflect | `0.3002` | `0.8248` (82.48%) | `0.7347` (73.47%) | `25.0171` | `0.8539` Dice / `21.56 px` HD |
+| 8 | **Exp-11: Full AMFU-Net + CLAHE** | 19.03M | GPU Reflect | `0.2967` | `0.8234` (82.34%) | `0.7338` (73.38%) | `25.5712` | `0.8498` Dice / `21.95 px` HD |
+| 9 | **Exp-01: Full AMFU-Net + SRAD + CLAHE** | 19.03M | CPU OpenCV | `0.3073` | `0.8120` (81.20%) | `0.7134` (71.34%) | `31.5510` | `0.8310` Dice / `29.80 px` HD |
+| 10 | **Exp-05: Full AMFU-Net + SRAD Alone** | 19.03M | CPU OpenCV | `0.3159` | `0.8110` (81.10%) | `0.7166` (71.66%) | `29.5323` | `0.8326` Dice / `26.81 px` HD |
+| 11 | **Exp-03: Full AMFU-Net + Raw Ultrasound** | 19.03M | CPU OpenCV | `0.3203` | `0.8052` (80.52%) | `0.7081` (70.81%) | `32.7928` | `0.8250` Dice / `30.77 px` HD |
+| 12 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `0.8003` (80.03%) | `0.7065` (70.65%) | `36.8169` | `0.8435` Dice / `25.15 px` HD |
+| 13 | **Exp-02: Plain U-Net + SRAD + CLAHE** | 3.83M | CPU OpenCV | `0.3605` | `0.7823` (78.23%) | `0.6824` (68.24%) | `41.3804` | `0.8250` Dice / `30.93 px` HD |
+| 14 | **Exp-04: Plain U-Net + Raw Ultrasound** | 3.83M | CPU OpenCV | `0.3662` | `0.7793` (77.93%) | `0.6780` (67.80%) | `40.6824` | `0.8206` Dice / `33.25 px` HD |
+
 
