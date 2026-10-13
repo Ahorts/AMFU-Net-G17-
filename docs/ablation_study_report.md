@@ -218,13 +218,21 @@ To evaluate PDE anisotropic diffusion on our champion architecture (U-Net + DAG,
   The exact same degradation pattern observed on Full AMFU-Net (Raw $83.58\% >$ CLAHE $82.48\% >$ SRAD $82.12\%$) repeats monotonically on U-Net + DAG. This proves definitively that the degradation is not an architectural artifact of the multi-scale bottleneck, but an intrinsic penalty of PDE anisotropic diffusion attenuating high-frequency acoustic speckle margins.
 - **Architectural Dominance Over Full AMFU-Net:** Even when hobbled by SRAD over-smoothing, U-Net + DAG (Exp-24: **`0.8286` Dice / `22.77 px` HD95**, 6.19M params) beats Full AMFU-Net on SRAD (Exp-20: **`0.8212` Dice / `28.87 px` HD95**, 19.03M params) by **+0.74% Dice** and **-6.10 px lower boundary error**, while eliminating **12.85M parameters (-67.5%)**.
 
-### 5.18 U-Net + DAG on Dual Enhanced: Closing the Factorial Modality Matrix (Exp-25)
+#### 5.18 U-Net + DAG on Dual Enhanced: Closing the Factorial Modality Matrix (Exp-25)
 To conclude the complete modality $\times$ architecture factorial ablation matrix under modern `CosineAnnealingLR` optimization, U-Net + DAG (`6.19M` params) was trained on the dual-enhanced pipeline (`image` stacked SRAD + CLAHE):
 - **Universal Classical Preprocessing Degradation Law:**
   $$\mathbf{Raw\ (85.19\%)} > \mathbf{CLAHE\ (84.15\%)} > \mathbf{SRAD\ (82.86\%)} \ge \mathbf{Enhanced\ (82.76\%)}$$
   Stacking PDE anisotropic diffusion and adaptive contrast equalization compounds distortion, yielding the lowest performance among U-Net + DAG runs.
 - **Architectural Dominance Across All Modalities:**
   U-Net + DAG on Dual Enhanced (**`0.8276` Dice / `26.75 px` HD95**, 6.19M params) beats Full AMFU-Net on Dual Enhanced (**Exp-21: `0.8151` Dice / `28.93 px` HD95**, 19.03M params) by **+1.25% Dice** and **-2.18 px HD95** while slashing **12.85M parameters (-67.5%)**. Attention gating consistently outperforms multi-scale feature fusion regardless of input modality.
+
+### 5.19 Plain U-Net on Dual Enhanced: Un-Gated Noise Injection & Out-of-Distribution Breakdown (Exp-26)
+To map the baseline's response to stacked SRAD + CLAHE preprocessing under `CosineAnnealingLR`, Plain U-Net (`3.83M` params) was evaluated on `image` (Dual Enhanced):
+- **Severe Performance Collapse:**
+  $$\mathbf{CLAHE\ Alone\ (81.74\%)} > \mathbf{Raw\ (81.02\%)} > \mathbf{Dual\ Enhanced\ (79.08\%)}$$
+  Dual enhancement penalizes Plain U-Net by **-2.66% Dice** compared to CLAHE alone and **-1.94% Dice** compared to Raw, dragging performance below the 80% boundary.
+- **Catastrophic Boundary Error on External Cohorts:**
+  Boundary error rises to **`38.93 px` HD95** overall, and explodes to **`78.13 px` HD95** on external hospital cohort `BUS_UCLM`. Without Attention Gating (DAG), the decoder directly concatenates over-smoothed acoustic textures and boosted contrast halos, flooding feature maps with severe out-of-distribution false positives.
 
 ---
 
@@ -253,8 +261,9 @@ Across all systematic ablation runs evaluated on 266 immutable internal test sca
 | 17 | **Exp-22: Plain U-Net Baseline + Raw + Cosine** | 3.83M | GPU Reflect | `0.3212` | `0.8102` (8102%) | `0.7195` (71.95%) | `32.5825` | `0.8328` Dice / `23.92 px` HD |
 | 18 | **Exp-03: Full AMFU-Net + Raw Ultrasound** | 19.03M | CPU OpenCV | `0.3203` | `0.8052` (80.52%) | `0.7081` (70.81%) | `32.7928` | `0.8250` Dice / `30.77 px` HD |
 | 19 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `0.8003` (80.03%) | `0.7065` (70.65%) | `36.8169` | `0.8435` Dice / `25.15 px` HD |
-| 20 | **Exp-02: Plain U-Net + SRAD + CLAHE** | 3.83M | CPU OpenCV | `0.3605` | `0.7823` (78.23%) | `0.6824` (68.24%) | `41.3804` | `0.8250` Dice / `30.93 px` HD |
-| 21 | **Exp-04: Plain U-Net + Raw Ultrasound** | 3.83M | CPU OpenCV | `0.3662` | `0.7793` (77.93%) | `0.6780` (67.80%) | `40.6824` | `0.8206` Dice / `33.25 px` HD |
+| 20 | **Exp-26: Plain U-Net Baseline + Enhanced + Cosine** | 3.83M | GPU Reflect | `0.3600` | `0.7908` (79.08%) | `0.6907` (69.07%) | `38.9300` | `0.8184` Dice / `33.16 px` HD |
+| 21 | **Exp-02: Plain U-Net + SRAD + CLAHE** | 3.83M | CPU OpenCV | `0.3605` | `0.7823` (78.23%) | `0.6824` (68.24%) | `41.3804` | `0.8250` Dice / `30.93 px` HD |
+| 22 | **Exp-04: Plain U-Net + Raw Ultrasound** | 3.83M | CPU OpenCV | `0.3662` | `0.7793` (77.93%) | `0.6780` (67.80%) | `40.6824` | `0.8206` Dice / `33.25 px` HD |
 
 
 

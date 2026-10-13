@@ -414,6 +414,20 @@ Experiment Summary:
      * Stacking classical preprocessing filters compounds degradation across both architectures.
      * Architectural Dominance holds universally: U-Net + DAG beats Full AMFU-Net across all 4 modalities (+1.61% on Raw, +1.67% on CLAHE, +0.74% on SRAD, +1.25% on Dual Enhanced) while slashing 12.85M parameters (-67.5%).
 
+26. Exp-26 (Plain U-Net Baseline on Dual Enhanced [SRAD + CLAHE] with Cosine Annealing; 3,831,489 parameters; DAG disabled, MFEF disabled; image [dual-enhanced]; CosineAnnealingLR eta_min=1e-5):
+   - Metrics: 0.7908 Dice (79.08%), 0.6907 Jaccard (69.07%), 38.93 px HD95, 11.91 px ASD, 0.3600 Loss.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8184 (81.84%, 33.16 px HD95, 9.65 px ASD)
+     * BUSI = 0.7243 (72.43%, 45.88 px HD95, 15.62 px ASD)
+     * BUS_UCLM = 0.7359 (73.59%, 78.13 px HD95, 23.44 px ASD)
+   - Plain U-Net Modality Comparison (Cosine):
+     * 1. CLAHE Alone (Exp-23): 0.8174 Dice, 0.7254 IoU, 33.95 px HD95, 0.3319 Loss
+     * 2. Raw Ultrasound (Exp-22): 0.8102 Dice, 0.7195 IoU, 32.58 px HD95, 0.3212 Loss
+     * 3. Dual Enhanced [SRAD+CLAHE] (Exp-26): 0.7908 Dice, 0.6907 IoU, 38.93 px HD95, 0.3600 Loss
+   - Empirical Insights:
+     * Dual enhancement degrades Plain U-Net severely (-2.66% Dice vs CLAHE, -1.94% vs Raw), falling below the 80% mark.
+     * Catastrophic Boundary Error on External Cohort: On BUS_UCLM, HD95 explodes to 78.13 px. Without Dual Attention Gating (DAG) on skip connections, un-gated concatenations pass over-smoothed and contrast-boosted acoustic artifacts directly into the decoder, triggering massive false positives on out-of-distribution scanners.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
