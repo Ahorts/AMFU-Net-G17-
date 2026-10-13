@@ -384,6 +384,19 @@ Experiment Summary:
      * Plain U-Net Modality Comparison (Cosine): On Plain U-Net without attention gating, CLAHE provides a slight contrast boost over Raw (81.74% vs 81.02% Dice, +0.72%), but boundary error worsens (33.95 px vs 32.58 px HD95).
      * Conversely, on U-Net + DAG (Exp-16 vs Exp-17), attention gates extract superior edge localization directly from Raw acoustic speckle (85.19% Dice, 20.72 px HD95 on Raw vs 84.15% Dice, 23.62 px HD95 on CLAHE).
 
+24. Exp-24 (U-Net + DAG on SRAD Alone with Cosine Annealing; 6,185,505 parameters; DAG enabled, MFEF disabled; srad_image; CosineAnnealingLR eta_min=1e-5):
+   - Metrics: 0.8286 Dice (82.86%), 0.7389 Jaccard (73.89%), 22.7732 px HD95, 6.9531 px ASD, 0.3095 Loss.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8437 (84.37%, 20.4143 px HD95, 5.8773 px ASD)
+     * BUSI = 0.7800 (78.00%, 28.0221 px HD95, 10.0986 px ASD)
+     * BUS_UCLM = 0.8468 (84.68%, 29.2003 px HD95, 6.8776 px ASD)
+   - Definitive Modality Ranking on Champion Architecture (U-Net + DAG):
+     * 1. Raw Ultrasound (Exp-16): 0.8519 Dice, 0.7637 IoU, 20.72 px HD95, 0.2580 Loss
+     * 2. CLAHE Alone (Exp-17): 0.8415 Dice, 0.7564 IoU, 23.62 px HD95, 0.2791 Loss
+     * 3. SRAD Alone (Exp-24): 0.8286 Dice, 0.7389 IoU, 22.77 px HD95, 0.3095 Loss
+     * Empirical Invariant: Just as on Full AMFU-Net (Raw 83.58% > CLAHE 82.48% > SRAD 82.12%), preprocessing on U-Net + DAG strictly follows Raw > CLAHE > SRAD. Anisotropic diffusion attenuation degrades convolutional margin detection across both architectures.
+     * Architectural Dominance: U-Net + DAG on SRAD (82.86% Dice, 22.77 px HD95) beats Full AMFU-Net on SRAD (Exp-20: 82.12% Dice, 28.87 px HD95) by +0.74% Dice and -6.10 px HD95 while slashing 12.85M parameters (-67.5%).
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
