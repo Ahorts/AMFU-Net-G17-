@@ -205,6 +205,12 @@ To measure the true lower bound of standard U-Net architecture without attention
 - **The Massive Attention Gating Lift:** Adding Dual Attention Gates (DAG, +2.35M params) to Plain U-Net under identical Raw + Cosine conditions (**Exp-16: `0.8519` Dice / `20.72 px` HD95** vs **Exp-22: `0.8102` Dice / `32.58 px` HD95**) yields a colossal **+4.17% Dice boost**, **+4.42% IoU lift**, and **-11.86 px (-36.4%) boundary error reduction**.
 - **Cross-Center Domain Vulnerability of Vanilla Skip Connections:** On external hospital cohort `BUS_UCLM`, Plain U-Net suffered severe boundary collapse (**`75.9864 px` HD95**, `22.2893 px` ASD), compared to **`30.0883 px` HD95** for U-Net + DAG (a **2.5× error magnification**). Unweighted skip connections flood the decoder with out-of-distribution acoustic background noise, establishing DAG attention filtering as strictly required for multi-center clinical generalization.
 
+### 5.16 Plain U-Net Baseline on CLAHE Alone with Cosine Annealing (Exp-23)
+To close the factorial architecture $\times$ modality matrix across modern optimization (`CosineAnnealingLR`), Plain U-Net (`3.83M` params) was evaluated on `clahe_image`:
+- **Attention Gating (DAG) Lift on CLAHE:** Adding Dual Attention Gates (Exp-17: **`0.8415` Dice / `23.62 px` HD95**) over Plain U-Net (Exp-23: **`0.8174` Dice / `33.95 px` HD95**) yields a definitive **+2.41% absolute Dice lift**, **+3.10% IoU increase**, and cuts boundary error by **-10.33 px (-30.4%)**.
+- **Modality Dynamics on Plain Architecture:** On Plain U-Net lacking attention gating, CLAHE contrast equalization provides a modest Dice lift over Raw (**`81.74%` vs `81.02%`**, $+0.72\%$), as artificial contrast stretching compensates for the lack of attention focus. However, boundary error worsens from `32.58 px` to `33.95 px` HD95 due to equalized background noise halos.
+- **The Classical Preprocessing Defeat:** Crucially, Plain U-Net on standard CLAHE (**`81.74%` Dice**, 3.83M params) outperforms the $5\times$ larger Full AMFU-Net on the dual-enhanced SRAD+CLAHE pipeline (**Exp-21: `81.51%` Dice**, 19.03M params). Stacking PDE diffusion damages acoustic margins to such a degree that even an un-gated vanilla baseline on simple CLAHE surpasses the full paper architecture.
+
 ---
 
 ## 6. Complete Empirical Synthesis & Final Ranking
@@ -223,14 +229,15 @@ Across all systematic ablation runs evaluated on 266 immutable internal test sca
 | 8 | **Exp-18: Full AMFU-Net + CLAHE + Cosine** | 19.03M | GPU Reflect | `0.3002` | `0.8248` (82.48%) | `0.7347` (73.47%) | `25.0171` | `0.8539` Dice / `21.56 px` HD |
 | 9 | **Exp-11: Full AMFU-Net + CLAHE** | 19.03M | GPU Reflect | `0.2967` | `0.8234` (82.34%) | `0.7338` (73.38%) | `25.5712` | `0.8498` Dice / `21.95 px` HD |
 | 10 | **Exp-20: Full AMFU-Net + SRAD Alone + Cosine** | 19.03M | GPU Reflect | `0.2983` | `0.8212` (82.12%) | `0.7261` (72.61%) | `28.8731` | `0.8373` Dice / `26.50 px` HD |
-| 11 | **Exp-21: Full AMFU-Net + Enhanced + Cosine** | 19.03M | GPU Reflect | `0.3122` | `0.8151` (81.51%) | `0.7177` (71.77%) | `28.9271` | `0.8289` Dice / `27.30 px` HD |
-| 12 | **Exp-01: Full AMFU-Net + SRAD + CLAHE** | 19.03M | CPU OpenCV | `0.3073` | `0.8120` (81.20%) | `0.7134` (71.34%) | `31.5510` | `0.8310` Dice / `29.80 px` HD |
-| 13 | **Exp-05: Full AMFU-Net + SRAD Alone** | 19.03M | CPU OpenCV | `0.3159` | `0.8110` (81.10%) | `0.7166` (71.66%) | `29.5323` | `0.8326` Dice / `26.81 px` HD |
-| 14 | **Exp-22: Plain U-Net Baseline + Raw + Cosine** | 3.83M | GPU Reflect | `0.3212` | `0.8102` (81.02%) | `0.7195` (71.95%) | `32.5825` | `0.8328` Dice / `23.92 px` HD |
-| 15 | **Exp-03: Full AMFU-Net + Raw Ultrasound** | 19.03M | CPU OpenCV | `0.3203` | `0.8052` (80.52%) | `0.7081` (70.81%) | `32.7928` | `0.8250` Dice / `30.77 px` HD |
-| 16 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `0.8003` (80.03%) | `0.7065` (70.65%) | `36.8169` | `0.8435` Dice / `25.15 px` HD |
-| 17 | **Exp-02: Plain U-Net + SRAD + CLAHE** | 3.83M | CPU OpenCV | `0.3605` | `0.7823` (78.23%) | `0.6824` (68.24%) | `41.3804` | `0.8250` Dice / `30.93 px` HD |
-| 18 | **Exp-04: Plain U-Net + Raw Ultrasound** | 3.83M | CPU OpenCV | `0.3662` | `0.7793` (77.93%) | `0.6780` (67.80%) | `40.6824` | `0.8206` Dice / `33.25 px` HD |
+| 11 | **Exp-23: Plain U-Net Baseline + CLAHE + Cosine** | 3.83M | GPU Reflect | `0.3319` | `0.8174` (81.74%) | `0.7254` (72.54%) | `33.9468` | `0.8435` Dice / `26.30 px` HD |
+| 12 | **Exp-21: Full AMFU-Net + Enhanced + Cosine** | 19.03M | GPU Reflect | `0.3122` | `0.8151` (81.51%) | `0.7177` (71.77%) | `28.9271` | `0.8289` Dice / `27.30 px` HD |
+| 13 | **Exp-01: Full AMFU-Net + SRAD + CLAHE** | 19.03M | CPU OpenCV | `0.3073` | `0.8120` (81.20%) | `0.7134` (71.34%) | `31.5510` | `0.8310` Dice / `29.80 px` HD |
+| 14 | **Exp-05: Full AMFU-Net + SRAD Alone** | 19.03M | CPU OpenCV | `0.3159` | `0.8110` (81.10%) | `0.7166` (71.66%) | `29.5323` | `0.8326` Dice / `26.81 px` HD |
+| 15 | **Exp-22: Plain U-Net Baseline + Raw + Cosine** | 3.83M | GPU Reflect | `0.3212` | `0.8102` (81.02%) | `0.7195` (71.95%) | `32.5825` | `0.8328` Dice / `23.92 px` HD |
+| 16 | **Exp-03: Full AMFU-Net + Raw Ultrasound** | 19.03M | CPU OpenCV | `0.3203` | `0.8052` (80.52%) | `0.7081` (70.81%) | `32.7928` | `0.8250` Dice / `30.77 px` HD |
+| 17 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `0.8003` (80.03%) | `0.7065` (70.65%) | `36.8169` | `0.8435` Dice / `25.15 px` HD |
+| 18 | **Exp-02: Plain U-Net + SRAD + CLAHE** | 3.83M | CPU OpenCV | `0.3605` | `0.7823` (78.23%) | `0.6824` (68.24%) | `41.3804` | `0.8250` Dice / `30.93 px` HD |
+| 19 | **Exp-04: Plain U-Net + Raw Ultrasound** | 3.83M | CPU OpenCV | `0.3662` | `0.7793` (77.93%) | `0.6780` (67.80%) | `40.6824` | `0.8206` Dice / `33.25 px` HD |
 
 
 
