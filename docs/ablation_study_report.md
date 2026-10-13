@@ -234,6 +234,14 @@ To map the baseline's response to stacked SRAD + CLAHE preprocessing under `Cosi
 - **Catastrophic Boundary Error on External Cohorts:**
   Boundary error rises to **`38.93 px` HD95** overall, and explodes to **`78.13 px` HD95** on external hospital cohort `BUS_UCLM`. Without Attention Gating (DAG), the decoder directly concatenates over-smoothed acoustic textures and boosted contrast halos, flooding feature maps with severe out-of-distribution false positives.
 
+### 5.20 Plain U-Net on SRAD Alone: Deepest Diffusion Degradation (Exp-27)
+To close the final cell of the $4 \times 4$ architecture $\times$ modality matrix for the Plain U-Net baseline, Plain U-Net (`3.83M` params) was evaluated on `srad_image` (SRAD Alone):
+- **Steepest Loss & Deepest Penalty on Baseline:**
+  $$\mathbf{CLAHE\ (81.74\%)} > \mathbf{Raw\ (81.02\%)} > \mathbf{Dual\ Enhanced\ (79.08\%)} > \mathbf{SRAD\ Alone\ (78.27\%)}$$
+  SRAD alone inflicts the highest test loss (**`0.3744`**) and lowest Dice score (**`78.27%`**) observed across all modern `CosineAnnealingLR` runs.
+- **Out-of-Distribution Generalization Failure:**
+  On the held-out multi-center test set, performance on `BUS_UCLM` drops to **`67.61%` Dice** with **`73.69 px` HD95**. Without Attention Gating (DAG) along skip connections to filter out smoothed low-contrast background features, the baseline is completely incapable of localizing acoustic boundaries degraded by anisotropic diffusion.
+
 ---
 
 ## 6. Complete Empirical Synthesis & Final Ranking
@@ -262,8 +270,9 @@ Across all systematic ablation runs evaluated on 266 immutable internal test sca
 | 18 | **Exp-03: Full AMFU-Net + Raw Ultrasound** | 19.03M | CPU OpenCV | `0.3203` | `0.8052` (80.52%) | `0.7081` (70.81%) | `32.7928` | `0.8250` Dice / `30.77 px` HD |
 | 19 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `0.8003` (80.03%) | `0.7065` (70.65%) | `36.8169` | `0.8435` Dice / `25.15 px` HD |
 | 20 | **Exp-26: Plain U-Net Baseline + Enhanced + Cosine** | 3.83M | GPU Reflect | `0.3600` | `0.7908` (79.08%) | `0.6907` (69.07%) | `38.9300` | `0.8184` Dice / `33.16 px` HD |
-| 21 | **Exp-02: Plain U-Net + SRAD + CLAHE** | 3.83M | CPU OpenCV | `0.3605` | `0.7823` (78.23%) | `0.6824` (68.24%) | `41.3804` | `0.8250` Dice / `30.93 px` HD |
-| 22 | **Exp-04: Plain U-Net + Raw Ultrasound** | 3.83M | CPU OpenCV | `0.3662` | `0.7793` (77.93%) | `0.6780` (67.80%) | `40.6824` | `0.8206` Dice / `33.25 px` HD |
+| 21 | **Exp-27: Plain U-Net Baseline + SRAD + Cosine** | 3.83M | GPU Reflect | `0.3744` | `0.7827` (78.27%) | `0.6906` (69.06%) | `33.0100` | `0.8153` Dice / `27.28 px` HD |
+| 22 | **Exp-02: Plain U-Net + SRAD + CLAHE** | 3.83M | CPU OpenCV | `0.3605` | `0.7823` (78.23%) | `0.6824` (68.24%) | `41.3804` | `0.8250` Dice / `30.93 px` HD |
+| 23 | **Exp-04: Plain U-Net + Raw Ultrasound** | 3.83M | CPU OpenCV | `0.3662` | `0.7793` (77.93%) | `0.6780` (67.80%) | `40.6824` | `0.8206` Dice / `33.25 px` HD |
 
 
 
