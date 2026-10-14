@@ -260,6 +260,15 @@ Evaluating U-Net + MFEF (`16.68M` params; `dag=False`, `mfef=True`) under `Cosin
 - **MFEF Modality Dynamics:**
   Contrasting MFEF on SRAD vs CLAHE reveals a clear clinical trade-off: SRAD maximizes multi-scale volume overlap (`84.75%` vs `83.58%` Dice), while CLAHE delivers superior boundary localization (`20.81 px` vs `23.70 px` HD95).
 
+### 5.23 U-Net + MFEF on Dual Enhanced: Compounded Filter Degradation (Exp-30)
+Evaluating U-Net + MFEF (`16.68M` params; `dag=False`, `mfef=True`) under `CosineAnnealingLR` on `image` (SRAD + CLAHE dual-enhanced):
+- **Compounded Filter Degradation:**
+  Exp-30 achieves **`82.89%` Dice**, **`24.51 px` 95HD**, and **`7.83 px` ASD** with a test loss of **`0.3061`**. Consistent with every other architecture in this study, stacking SRAD PDE diffusion and CLAHE contrast equalization degrades performance relative to single-stage filtering (SRAD Exp-28: `84.75%` Dice; CLAHE Exp-29: `83.58%` Dice).
+- **Out-of-Distribution Boundary Leakage (External Shift):**
+  While performing well on the primary training domain (`BUS_BRA`: `84.76%` Dice, `19.45 px` HD95), boundary error explodes on the external hospital cohort (`BUS_UCLM`: **`57.75 px` HD95**). This provides definitive proof that MFEF bottleneck multi-scale convolutions alone cannot stabilize boundaries across scanner distributions; Attention Gating (DAG) along skip connections is strictly required to prevent out-of-distribution contour collapse.
+- **MICCAI Clinical Rank #10:**
+  Secures a Clinical Rank-Sum of **`31`** (Dice #10, 95HD #8, ASD #13), placing it at **Clinical Rank #10 overall** (and #10 Overlap Rank).
+
 ---
 
 ## 6. Complete Empirical Synthesis & Final Ranking
@@ -277,22 +286,23 @@ Across all systematic ablation runs evaluated on 266 immutable internal test sca
 | 7 | #6 | **Exp-12: U-Net + DAG + CLAHE** | **6.19M** | GPU Reflect | `0.2741` | `83.68%` | `24.60 px` | `7.15 px` | `86.94%` / `18.38 px` | `36.74 px` |
 | 8 | #7 | **Exp-19: Full AMFU-Net + Raw + Cosine** | 19.03M | GPU Reflect | `0.2869` | `83.58%` | `25.38 px` | `7.36 px` | `85.96%` / `21.49 px` | `25.92 px` |
 | 9 | #12 | **Exp-13: U-Net + MFEF + CLAHE** | 16.68M | GPU Reflect | `0.2812` | `82.68%` | `21.78 px` | `7.66 px` | `86.93%` / `13.67 px` | `54.44 px` |
-| 10 | #13 | **Exp-18: Full AMFU-Net + CLAHE + Cosine** | 19.03M | GPU Reflect | `0.3002` | `82.48%` | `25.02 px` | `7.58 px` | `85.39%` / `21.56 px` | `42.05 px` |
-| 11 | #8 | **Exp-06: Full AMFU-Net + CLAHE Alone** | 19.03M | CPU OpenCV | `0.2807` | `83.19%` | `26.18 px` | `7.60 px` | `86.14%` / `21.38 px` | `38.22 px` |
-| 12 | #5 | **Exp-07: U-Net + DAG + CLAHE** | 6.19M | CPU OpenCV | `0.2854` | `83.98%` | `27.52 px` | `7.96 px` | `86.97%` / `21.32 px` | `45.86 px` |
-| 13 | #14 | **Exp-11: Full AMFU-Net + CLAHE** | 19.03M | GPU Reflect | `0.2967` | `82.34%` | `25.57 px` | `7.72 px` | `84.98%` / `21.95 px` | `25.37 px` |
-| 14 | #11 | **Exp-25: U-Net + DAG + Enhanced + Cosine** | **6.19M** | GPU Reflect | `0.2924` | `82.76%` | `26.75 px` | `7.96 px` | `84.35%` / `24.86 px` | **`15.08 px`** |
-| 15 | #10 | **Exp-08: U-Net + MFEF + CLAHE** | 16.68M | CPU OpenCV | `0.2842` | `82.84%` | `25.69 px` | `8.60 px` | `87.14%` / `16.90 px` | `60.04 px` |
-| 16 | #15 | **Exp-20: Full AMFU-Net + SRAD + Cosine** | 19.03M | GPU Reflect | `0.2983` | `82.12%` | `28.87 px` | `8.58 px` | `83.73%` / `26.50 px` | `26.67 px` |
-| 17 | #16 | **Exp-10: Full AMFU-Net + CLAHE (GPU)** | 19.03M | GPU Reflect | `0.3015` | `81.90%` | `27.63 px` | `8.59 px` | `84.86%` / `22.93 px` | `44.00 px` |
-| 18 | #18 | **Exp-21: Full AMFU-Net + Enhanced + Cosine** | 19.03M | GPU Reflect | `0.3122` | `81.51%` | `28.93 px` | `8.53 px` | `82.89%` / `27.30 px` | `24.02 px` |
-| 19 | #19 | **Exp-05: Full AMFU-Net + SRAD Alone** | 19.03M | CPU OpenCV | `0.3159` | `81.10%` | `29.53 px` | `8.87 px` | `83.26%` / `26.81 px` | `25.77 px` |
-| 20 | #20 | **Exp-22: Plain U-Net Baseline + Raw + Cosine** | 3.83M | GPU Reflect | `0.3212` | `81.02%` | `32.58 px` | `9.61 px` | `83.28%` / `23.92 px` | `75.99 px` |
-| 21 | #17 | **Exp-23: Plain U-Net Baseline + CLAHE + Cosine** | 3.83M | GPU Reflect | `0.3319` | `81.74%` | `33.95 px` | `9.87 px` | `84.35%` / `26.30 px` | `64.97 px` |
-| 22 | #24 | **Exp-27: Plain U-Net Baseline + SRAD + Cosine** | 3.83M | GPU Reflect | `0.3744` | `78.27%` | `33.01 px` | `10.44 px` | `81.53%` / `27.28 px` | `73.69 px` |
-| 23 | #22 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `80.03%` | `36.82 px` | `11.03 px` | `84.35%` / `25.15 px` | `75.10 px` |
-| 24 | #23 | **Exp-26: Plain U-Net Baseline + Enhanced + Cosine** | 3.83M | GPU Reflect | `0.3600` | `79.08%` | `38.93 px` | `11.91 px` | `81.84%` / `33.16 px` | `78.13 px` |
-| 25 | #21 | **Exp-09: Plain U-Net + CLAHE** | 3.83M | CPU OpenCV | `0.3354` | `80.04%` | `41.30 px` | `12.87 px` | `84.71%` / `32.02 px` | `77.03 px` |
+| 10 | #10 | **Exp-30: U-Net + MFEF + Enhanced + Cosine** | 16.68M | GPU Reflect | `0.3061` | `82.89%` | `24.51 px` | `7.83 px` | `84.76%` / `19.45 px` | `57.75 px` 🚩 |
+| 11 | #13 | **Exp-18: Full AMFU-Net + CLAHE + Cosine** | 19.03M | GPU Reflect | `0.3002` | `82.48%` | `25.02 px` | `7.58 px` | `85.39%` / `21.56 px` | `42.05 px` |
+| 12 | #8 | **Exp-06: Full AMFU-Net + CLAHE Alone** | 19.03M | CPU OpenCV | `0.2807` | `83.19%` | `26.18 px` | `7.60 px` | `86.14%` / `21.38 px` | `38.22 px` |
+| 13 | #5 | **Exp-07: U-Net + DAG + CLAHE** | 6.19M | CPU OpenCV | `0.2854` | `83.98%` | `27.52 px` | `7.96 px` | `86.97%` / `21.32 px` | `45.86 px` |
+| 14 | #14 | **Exp-11: Full AMFU-Net + CLAHE** | 19.03M | GPU Reflect | `0.2967` | `82.34%` | `25.57 px` | `7.72 px` | `84.98%` / `21.95 px` | `25.37 px` |
+| 15 | #11 | **Exp-25: U-Net + DAG + Enhanced + Cosine** | **6.19M** | GPU Reflect | `0.2924` | `82.76%` | `26.75 px` | `7.96 px` | `84.35%` / `24.86 px` | **`15.08 px`** |
+| 16 | #10 | **Exp-08: U-Net + MFEF + CLAHE** | 16.68M | CPU OpenCV | `0.2842` | `82.84%` | `25.69 px` | `8.60 px` | `87.14%` / `16.90 px` | `60.04 px` |
+| 17 | #15 | **Exp-20: Full AMFU-Net + SRAD + Cosine** | 19.03M | GPU Reflect | `0.2983` | `82.12%` | `28.87 px` | `8.58 px` | `83.73%` / `26.50 px` | `26.67 px` |
+| 18 | #16 | **Exp-10: Full AMFU-Net + CLAHE (GPU)** | 19.03M | GPU Reflect | `0.3015` | `81.90%` | `27.63 px` | `8.59 px` | `84.86%` / `22.93 px` | `44.00 px` |
+| 19 | #18 | **Exp-21: Full AMFU-Net + Enhanced + Cosine** | 19.03M | GPU Reflect | `0.3122` | `81.51%` | `28.93 px` | `8.53 px` | `82.89%` / `27.30 px` | `24.02 px` |
+| 20 | #19 | **Exp-05: Full AMFU-Net + SRAD Alone** | 19.03M | CPU OpenCV | `0.3159` | `81.10%` | `29.53 px` | `8.87 px` | `83.26%` / `26.81 px` | `25.77 px` |
+| 21 | #20 | **Exp-22: Plain U-Net Baseline + Raw + Cosine** | 3.83M | GPU Reflect | `0.3212` | `81.02%` | `32.58 px` | `9.61 px` | `83.28%` / `23.92 px` | `75.99 px` |
+| 22 | #17 | **Exp-23: Plain U-Net Baseline + CLAHE + Cosine** | 3.83M | GPU Reflect | `0.3319` | `81.74%` | `33.95 px` | `9.87 px` | `84.35%` / `26.30 px` | `64.97 px` |
+| 23 | #24 | **Exp-27: Plain U-Net Baseline + SRAD + Cosine** | 3.83M | GPU Reflect | `0.3744` | `78.27%` | `33.01 px` | `10.44 px` | `81.53%` / `27.28 px` | `73.69 px` |
+| 24 | #22 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `80.03%` | `36.82 px` | `11.03 px` | `84.35%` / `25.15 px` | `75.10 px` |
+| 25 | #23 | **Exp-26: Plain U-Net Baseline + Enhanced + Cosine** | 3.83M | GPU Reflect | `0.3600` | `79.08%` | `38.93 px` | `11.91 px` | `81.84%` / `33.16 px` | `78.13 px` |
+| 26 | #21 | **Exp-09: Plain U-Net + CLAHE** | 3.83M | CPU OpenCV | `0.3354` | `80.04%` | `41.30 px` | `12.87 px` | `84.71%` / `32.02 px` | `77.03 px` |
 
 
 

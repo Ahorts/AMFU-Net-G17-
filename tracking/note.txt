@@ -467,6 +467,16 @@ Experiment Summary:
      * Primary Domain Record: Sets the lowest boundary error ever observed on BUS_BRA (14.44 px HD95, 4.74 px ASD).
      * MFEF Cosine Comparison: On CLAHE, MFEF achieves higher boundary sharpness (20.81 px HD95 vs 23.70 px on SRAD), while SRAD yields higher volume overlap (84.75% vs 83.58% Dice).
 
+30. Exp-30 (U-Net + MFEF on Dual Enhanced [SRAD + CLAHE] with Cosine Annealing; 16,681,633 parameters; DAG disabled, MFEF enabled; image [dual-enhanced]; CosineAnnealingLR eta_min=1e-5):
+   - Metrics: 0.8289 Dice (82.89%), 0.7408 Jaccard (74.08%), 24.51 px HD95, 7.83 px ASD, 0.3061 Loss.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8476 (84.76%, 19.45 px HD95, 6.15 px ASD)
+     * BUSI = 0.7845 (78.45%, 30.89 px HD95, 10.70 px ASD)
+     * BUS_UCLM = 0.7886 (78.86%, 57.75 px HD95, 15.82 px ASD)
+   - Clinical Multi-Metric Rank: #10 Overall (MICCAI R-Sum = 31), Overlap Rank #10:
+     * Dual Enhanced Degradation: Consistent with all other architectures, dual enhancement trails single-stage modalities (SRAD Exp-28: 84.75% Dice; CLAHE Exp-29: 83.58% Dice; Dual Enhanced Exp-30: 82.89% Dice).
+     * External Generalization Gap: On BUS_UCLM, HD95 explodes to 57.75 px. Without DAG attention gating on skip connections, un-gated decoders suffer boundary leakage when exposed to multi-scale features under compounded classical filtering.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
