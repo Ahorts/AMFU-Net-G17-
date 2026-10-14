@@ -444,6 +444,18 @@ Experiment Summary:
      * Domain Breakdown: Out-of-distribution performance on BUS_UCLM collapses to 67.61% Dice with 73.69 px HD95. Without attention gates to selectively recover boundary gradients, un-gated decoders are powerless against PDE diffusion over-smoothing.
      * Completes the 4-modality factorial grid for Plain U-Net: CLAHE (81.74%) > Raw (81.02%) > Dual Enhanced (79.08%) > SRAD (78.27%).
 
+28. Exp-28 (U-Net + MFEF on SRAD Alone with Cosine Annealing; 16,681,633 parameters; DAG disabled, MFEF enabled; srad_image; CosineAnnealingLR eta_min=1e-5):
+   - Metrics: 0.8475 Dice (84.75%), 0.7616 Jaccard (76.16%), 23.70 px HD95, 7.59 px ASD, 0.2550 Loss.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8657 (86.57%, 18.71 px HD95, 5.98 px ASD)
+     * BUSI = 0.8061 (80.61%, 33.03 px HD95, 10.20 px ASD)
+     * BUS_UCLM = 0.8007 (80.07%, 44.52 px HD95, 15.80 px ASD)
+   - Historic Breakthrough & Empirical Insights:
+     * Rank #2 Overall: Surges to second place in the master ablation ranking (84.75% Dice), trailing only Champion Exp-16 (U-Net + DAG on Raw, 85.19%).
+     * Lowest Loss in Study: Achieves the all-time lowest test loss recorded (0.2550), beating Exp-16 (0.2580).
+     * The Multi-Scale Diffusion Affinity: MFEF's parallel dilated convolution branches at the bottleneck capture multi-scale receptive fields that match the piecewise homogeneous regions produced by SRAD PDE anisotropic diffusion.
+     * The Attention Gate Penalty (Generalization Gap): While MFEF dominates the primary training domain (BUS_BRA = 86.57% Dice, 18.71 px HD95), the lack of DAG attention gating along skip connections causes out-of-distribution boundary error on BUS_UCLM to remain elevated (44.52 px HD95 vs 29.20 px for U-Net + DAG on SRAD, Exp-24).
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).

@@ -242,37 +242,47 @@ To close the final cell of the $4 \times 4$ architecture $\times$ modality matri
 - **Out-of-Distribution Generalization Failure:**
   On the held-out multi-center test set, performance on `BUS_UCLM` drops to **`67.61%` Dice** with **`73.69 px` HD95**. Without Attention Gating (DAG) along skip connections to filter out smoothed low-contrast background features, the baseline is completely incapable of localizing acoustic boundaries degraded by anisotropic diffusion.
 
+### 5.21 U-Net + MFEF on SRAD Alone: In-Domain Overlap Surge vs Out-of-Distribution Boundary Collapse (Exp-28)
+Opening the modern `CosineAnnealingLR` evaluations for the U-Net + MFEF architecture (`16.68M` params; `dag=False`, `mfef=True`), the model was evaluated on `srad_image`:
+- **Lowest Test Loss in Study (`0.2550`) & High Overlap (`84.75%` Dice):**
+  Exp-28 achieves the lowest test loss recorded across all 28 experiments, driven by high in-distribution performance on `BUS_BRA` (`86.57%` Dice / `18.71 px` HD95). The multi-scale dilated convolutions at the bottleneck excel at integrating piecewise homogeneous regions smoothed by SRAD.
+- **The Out-of-Distribution Boundary Penalty:**
+  Despite high volume overlap, boundary localization on the external hospital cohort `BUS_UCLM` degrades severely to **`44.52 px` HD95** (compared to `29.20 px` for U-Net + DAG on SRAD, Exp-24, and `15.08 px` for Exp-25).
+- **The Multi-Metric Reality Check (MICCAI Rank-Sum):**
+  Under clinical multi-metric evaluation (MICCAI Rank-Sum across Dice, 95HD, and ASD), Exp-28 falls from #2 (Dice only) to **#5 Clinical Utility** (Rank-Sum 16) and **#7 Cross-Hospital Generalization** (Rank-Sum 31). This confirms that without Attention Gating (DAG) on skip connections, MFEF acts as an in-domain feature amplifier but fails to stabilize boundary contours on unseen ultrasound machines.
+
 ---
 
 ## 6. Complete Empirical Synthesis & Final Ranking
 
-Across all systematic ablation runs evaluated on 266 immutable internal test scans:
+Across all systematic ablation runs evaluated on 266 immutable internal test scans, ranked by **Clinical Utility (MICCAI 3-Metric Rank-Sum across Dice, 95HD, and ASD)** alongside Overlap Rank (Dice):
 
-| Rank | Model & Modality | Params | Dataloader Pipeline | Test Loss | Test Dice | Test IoU | 95% HD (px) | Primary Domain (BUS_BRA) |
-| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 🥇 | **Exp-16: U-Net + DAG (No MFEF) + Raw + Cosine** | **6.19M** | GPU Reflect | **`0.2580`** | **`0.8519` (85.19%)** | **`0.7637` (76.37%)** | **`20.7201`** | **`0.8725` Dice / `15.05 px` HD** |
-| 🥈 | **Exp-15: U-Net + DAG (No MFEF) + Raw + StepLR** | **6.19M** | GPU Reflect | `0.2994` | `0.8416` (84.16%) | `0.7546` (75.46%) | `23.4451` | `0.8716` Dice / `18.38 px` HD |
-| 🥉 | **Exp-17: U-Net + DAG (No MFEF) + CLAHE + Cosine** | **6.19M** | GPU Reflect | `0.2791` | `0.8415` (84.15%) | `0.7564` (75.64%) | `23.6166` | `0.8629` Dice / `20.21 px` HD |
-| 4 | **Exp-12: U-Net + DAG (No MFEF) + CLAHE** | **6.19M** | GPU Reflect | `0.2741` | `0.8368` (83.68%) | `0.7505` (75.05%) | `24.6045` | `0.8694` Dice / `18.38 px` HD |
-| 5 | **Exp-19: Full AMFU-Net + Raw + Cosine** | 19.03M | GPU Reflect | `0.2869` | `0.8358` (83.58%) | `0.7476` (74.76%) | `25.3790` | `0.8596` Dice / `21.49 px` HD |
-| 6 | **Exp-06: Full AMFU-Net + CLAHE Alone** | 19.03M | CPU OpenCV | `0.2807` | `0.8319` (83.19%) | `0.7418` (74.18%) | `26.1766` | `0.8614` Dice / `21.38 px` HD |
-| 7 | **Exp-24: U-Net + DAG (No MFEF) + SRAD + Cosine** | **6.19M** | GPU Reflect | `0.3095` | `0.8286` (82.86%) | `0.7389` (73.89%) | `22.7732` | `0.8437` Dice / `20.41 px` HD |
-| 8 | **Exp-25: U-Net + DAG (No MFEF) + Enhanced + Cosine** | **6.19M** | GPU Reflect | `0.2924` | `0.8276` (82.76%) | `0.7377` (73.77%) | `26.7500` | `0.8435` Dice / `24.86 px` HD |
-| 9 | **Exp-13: U-Net + MFEF (No DAG) + CLAHE** | 16.68M | GPU Reflect | `0.2812` | `0.8268` (82.68%) | `0.7447` (74.47%) | `21.7793` | `0.8693` Dice / `13.67 px` HD |
-| 10 | **Exp-18: Full AMFU-Net + CLAHE + Cosine** | 19.03M | GPU Reflect | `0.3002` | `0.8248` (82.48%) | `0.7347` (73.47%) | `25.0171` | `0.8539` Dice / `21.56 px` HD |
-| 11 | **Exp-11: Full AMFU-Net + CLAHE** | 19.03M | GPU Reflect | `0.2967` | `0.8234` (82.34%) | `0.7338` (73.38%) | `25.5712` | `0.8498` Dice / `21.95 px` HD |
-| 12 | **Exp-20: Full AMFU-Net + SRAD Alone + Cosine** | 19.03M | GPU Reflect | `0.2983` | `0.8212` (82.12%) | `0.7261` (72.61%) | `28.8731` | `0.8373` Dice / `26.50 px` HD |
-| 13 | **Exp-23: Plain U-Net Baseline + CLAHE + Cosine** | 3.83M | GPU Reflect | `0.3319` | `0.8174` (81.74%) | `0.7254` (72.54%) | `33.9468` | `0.8435` Dice / `26.30 px` HD |
-| 14 | **Exp-21: Full AMFU-Net + Enhanced + Cosine** | 19.03M | GPU Reflect | `0.3122` | `0.8151` (81.51%) | `0.7177` (71.77%) | `28.9271` | `0.8289` Dice / `27.30 px` HD |
-| 15 | **Exp-01: Full AMFU-Net + SRAD + CLAHE** | 19.03M | CPU OpenCV | `0.3073` | `0.8120` (81.20%) | `0.7134` (71.34%) | `31.5510` | `0.8310` Dice / `29.80 px` HD |
-| 16 | **Exp-05: Full AMFU-Net + SRAD Alone** | 19.03M | CPU OpenCV | `0.3159` | `0.8110` (81.10%) | `0.7166` (71.66%) | `29.5323` | `0.8326` Dice / `26.81 px` HD |
-| 17 | **Exp-22: Plain U-Net Baseline + Raw + Cosine** | 3.83M | GPU Reflect | `0.3212` | `0.8102` (8102%) | `0.7195` (71.95%) | `32.5825` | `0.8328` Dice / `23.92 px` HD |
-| 18 | **Exp-03: Full AMFU-Net + Raw Ultrasound** | 19.03M | CPU OpenCV | `0.3203` | `0.8052` (80.52%) | `0.7081` (70.81%) | `32.7928` | `0.8250` Dice / `30.77 px` HD |
-| 19 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `0.8003` (80.03%) | `0.7065` (70.65%) | `36.8169` | `0.8435` Dice / `25.15 px` HD |
-| 20 | **Exp-26: Plain U-Net Baseline + Enhanced + Cosine** | 3.83M | GPU Reflect | `0.3600` | `0.7908` (79.08%) | `0.6907` (69.07%) | `38.9300` | `0.8184` Dice / `33.16 px` HD |
-| 21 | **Exp-27: Plain U-Net Baseline + SRAD + Cosine** | 3.83M | GPU Reflect | `0.3744` | `0.7827` (78.27%) | `0.6906` (69.06%) | `33.0100` | `0.8153` Dice / `27.28 px` HD |
-| 22 | **Exp-02: Plain U-Net + SRAD + CLAHE** | 3.83M | CPU OpenCV | `0.3605` | `0.7823` (78.23%) | `0.6824` (68.24%) | `41.3804` | `0.8250` Dice / `30.93 px` HD |
-| 23 | **Exp-04: Plain U-Net + Raw Ultrasound** | 3.83M | CPU OpenCV | `0.3662` | `0.7793` (77.93%) | `0.6780` (67.80%) | `40.6824` | `0.8206` Dice / `33.25 px` HD |
+| Clin. Rank | Overlap Rank | Model & Modality | Params | Dataloader | Test Loss | Test Dice | 95% HD (px) | ASD (px) | Primary Domain (BUS_BRA) | External (BUS_UCLM 95HD) |
+| :---: | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| 🥇 | #1 | **Exp-16: U-Net + DAG + Raw + Cosine** | **6.19M** | GPU Reflect | **`0.2580`** | **`85.19%`** | **`20.72 px`** | **`6.27 px`** | **`87.25%` / `15.05 px`** | **`30.09 px`** |
+| 🥈 | #4 | **Exp-17: U-Net + DAG + CLAHE + Cosine** | **6.19M** | GPU Reflect | `0.2791` | `84.15%` | `23.62 px` | `7.05 px` | `86.29%` / `20.21 px` | `33.27 px` |
+| 🥉 | #3 | **Exp-15: U-Net + DAG + Raw + StepLR** | **6.19M** | GPU Reflect | `0.2994` | `84.16%` | `23.45 px` | `7.19 px` | `87.16%` / `18.38 px` | `28.84 px` |
+| 4 | #9 | **Exp-24: U-Net + DAG + SRAD + Cosine** | **6.19M** | GPU Reflect | `0.3095` | `82.86%` | `22.77 px` | `6.95 px` | `84.37%` / `20.41 px` | `29.20 px` |
+| 5 | #2 | **Exp-28: U-Net + MFEF + SRAD + Cosine** | 16.68M | GPU Reflect | **`0.2550`** | `84.75%` | `23.70 px` | `7.59 px` | `86.57%` / `18.71 px` | **`44.52 px`** 🚩 |
+| 6 | #6 | **Exp-12: U-Net + DAG + CLAHE** | **6.19M** | GPU Reflect | `0.2741` | `83.68%` | `24.60 px` | `7.15 px` | `86.94%` / `18.38 px` | `36.74 px` |
+| 7 | #7 | **Exp-19: Full AMFU-Net + Raw + Cosine** | 19.03M | GPU Reflect | `0.2869` | `83.58%` | `25.38 px` | `7.36 px` | `85.96%` / `21.49 px` | `25.92 px` |
+| 8 | #12 | **Exp-13: U-Net + MFEF + CLAHE** | 16.68M | GPU Reflect | `0.2812` | `82.68%` | `21.78 px` | `7.66 px` | `86.93%` / `13.67 px` | `54.44 px` |
+| 9 | #13 | **Exp-18: Full AMFU-Net + CLAHE + Cosine** | 19.03M | GPU Reflect | `0.3002` | `82.48%` | `25.02 px` | `7.58 px` | `85.39%` / `21.56 px` | `42.05 px` |
+| 10 | #8 | **Exp-06: Full AMFU-Net + CLAHE Alone** | 19.03M | CPU OpenCV | `0.2807` | `83.19%` | `26.18 px` | `7.60 px` | `86.14%` / `21.38 px` | `38.22 px` |
+| 11 | #5 | **Exp-07: U-Net + DAG + CLAHE** | 6.19M | CPU OpenCV | `0.2854` | `83.98%` | `27.52 px` | `7.96 px` | `86.97%` / `21.32 px` | `45.86 px` |
+| 12 | #14 | **Exp-11: Full AMFU-Net + CLAHE** | 19.03M | GPU Reflect | `0.2967` | `82.34%` | `25.57 px` | `7.72 px` | `84.98%` / `21.95 px` | `25.37 px` |
+| 13 | #11 | **Exp-25: U-Net + DAG + Enhanced + Cosine** | **6.19M** | GPU Reflect | `0.2924` | `82.76%` | `26.75 px` | `7.96 px` | `84.35%` / `24.86 px` | **`15.08 px`** |
+| 14 | #10 | **Exp-08: U-Net + MFEF + CLAHE** | 16.68M | CPU OpenCV | `0.2842` | `82.84%` | `25.69 px` | `8.60 px` | `87.14%` / `16.90 px` | `60.04 px` |
+| 15 | #15 | **Exp-20: Full AMFU-Net + SRAD + Cosine** | 19.03M | GPU Reflect | `0.2983` | `82.12%` | `28.87 px` | `8.58 px` | `83.73%` / `26.50 px` | `26.67 px` |
+| 16 | #16 | **Exp-10: Full AMFU-Net + CLAHE (GPU)** | 19.03M | GPU Reflect | `0.3015` | `81.90%` | `27.63 px` | `8.59 px` | `84.86%` / `22.93 px` | `44.00 px` |
+| 17 | #18 | **Exp-21: Full AMFU-Net + Enhanced + Cosine** | 19.03M | GPU Reflect | `0.3122` | `81.51%` | `28.93 px` | `8.53 px` | `82.89%` / `27.30 px` | `24.02 px` |
+| 18 | #19 | **Exp-05: Full AMFU-Net + SRAD Alone** | 19.03M | CPU OpenCV | `0.3159` | `81.10%` | `29.53 px` | `8.87 px` | `83.26%` / `26.81 px` | `25.77 px` |
+| 19 | #20 | **Exp-22: Plain U-Net Baseline + Raw + Cosine** | 3.83M | GPU Reflect | `0.3212` | `81.02%` | `32.58 px` | `9.61 px` | `83.28%` / `23.92 px` | `75.99 px` |
+| 20 | #17 | **Exp-23: Plain U-Net Baseline + CLAHE + Cosine** | 3.83M | GPU Reflect | `0.3319` | `81.74%` | `33.95 px` | `9.87 px` | `84.35%` / `26.30 px` | `64.97 px` |
+| 21 | #24 | **Exp-27: Plain U-Net Baseline + SRAD + Cosine** | 3.83M | GPU Reflect | `0.3744` | `78.27%` | `33.01 px` | `10.44 px` | `81.53%` / `27.28 px` | `73.69 px` |
+| 22 | #22 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `80.03%` | `36.82 px` | `11.03 px` | `84.35%` / `25.15 px` | `75.10 px` |
+| 23 | #23 | **Exp-26: Plain U-Net Baseline + Enhanced + Cosine** | 3.83M | GPU Reflect | `0.3600` | `79.08%` | `38.93 px` | `11.91 px` | `81.84%` / `33.16 px` | `78.13 px` |
+| 24 | #21 | **Exp-09: Plain U-Net + CLAHE** | 3.83M | CPU OpenCV | `0.3354` | `80.04%` | `41.30 px` | `12.87 px` | `84.71%` / `32.02 px` | `77.03 px` |
 
 
 
