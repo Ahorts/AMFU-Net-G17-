@@ -269,6 +269,17 @@ Evaluating U-Net + MFEF (`16.68M` params; `dag=False`, `mfef=True`) under `Cosin
 - **MICCAI Clinical Rank #10:**
   Secures a Clinical Rank-Sum of **`31`** (Dice #10, 95HD #8, ASD #13), placing it at **Clinical Rank #10 overall** (and #10 Overlap Rank).
 
+### 5.24 U-Net + MFEF on Raw Ultrasound: Historic Boundary Sharpness & Matrix Closure (Exp-31)
+Evaluating U-Net + MFEF (`16.68M` params; `dag=False`, `mfef=True`) under `CosineAnnealingLR` on `raw_image`:
+- **Historic Boundary Sharpness (All-Time Record):**
+  Exp-31 shatters the 20 px barrier for the entire research project, achieving **`18.75 px` 95HD** across all 266 test scans (surpassing Champion Exp-16's `20.72 px`). It also ties Exp-16 for the sharpest Average Surface Distance (**`6.27 px` ASD**).
+- **Clinical Rank #2 Overall:**
+  Combining volume overlap (`84.65%` Dice, Rank #3), boundary error (`18.75 px`, Rank #1), and surface distance (`6.27 px`, Rank #1), Exp-31 earns a Clinical Rank-Sum of **`5`**, taking **🥈 Clinical Rank #2 overall** behind only Exp-16 (R-Sum = 3).
+- **The Native Speckle Multi-Scale Synergy:**
+  Without classical filtering, MFEF's multi-scale receptive fields (parallel dilated branches at the bottleneck) extract multi-scale speckle backscatter representations natively, yielding outstanding in-domain delineation on `BUS_BRA` (`87.11%` Dice, `15.54 px` 95HD).
+- **Closure of the 16-Cell Factorial Grid:**
+  With Exp-31 complete, all 16 cells of the $4 \times 4$ factorial ablation matrix (Architecture $\times$ Modality) have been executed, evaluated, and published under identical `CosineAnnealingLR` + GPU reflection padding.
+
 ---
 
 ## 6. Complete Empirical Synthesis & Final Ranking
@@ -277,32 +288,33 @@ Across all systematic ablation runs evaluated on 266 immutable internal test sca
 
 | Clin. Rank | Overlap Rank | Model & Modality | Params | Dataloader | Test Loss | Test Dice | 95% HD (px) | ASD (px) | Primary Domain (BUS_BRA) | External (BUS_UCLM 95HD) |
 | :---: | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 🥇 | #1 | **Exp-16: U-Net + DAG + Raw + Cosine** | **6.19M** | GPU Reflect | **`0.2580`** | **`85.19%`** | **`20.72 px`** | **`6.27 px`** | **`87.25%` / `15.05 px`** | **`30.09 px`** |
-| 🥈 | #8 | **Exp-29: U-Net + MFEF + CLAHE + Cosine** | 16.68M | GPU Reflect | `0.2931` | `83.58%` | **`20.81 px`** | **`6.70 px`** | **`86.03%` / `14.44 px`** | `41.58 px` |
-| 🥉 | #4 | **Exp-17: U-Net + DAG + CLAHE + Cosine** | **6.19M** | GPU Reflect | `0.2791` | `84.15%` | `23.62 px` | `7.05 px` | `86.29%` / `20.21 px` | `33.27 px` |
-| 4 | #3 | **Exp-15: U-Net + DAG + Raw + StepLR** | **6.19M** | GPU Reflect | `0.2994` | `84.16%` | `23.45 px` | `7.19 px` | `87.16%` / `18.38 px` | `28.84 px` |
-| 5 | #9 | **Exp-24: U-Net + DAG + SRAD + Cosine** | **6.19M** | GPU Reflect | `0.3095` | `82.86%` | `22.77 px` | `6.95 px` | `84.37%` / `20.41 px` | `29.20 px` |
-| 6 | #2 | **Exp-28: U-Net + MFEF + SRAD + Cosine** | 16.68M | GPU Reflect | **`0.2550`** | `84.75%` | `23.70 px` | `7.59 px` | `86.57%` / `18.71 px` | `44.52 px` 🚩 |
-| 7 | #6 | **Exp-12: U-Net + DAG + CLAHE** | **6.19M** | GPU Reflect | `0.2741` | `83.68%` | `24.60 px` | `7.15 px` | `86.94%` / `18.38 px` | `36.74 px` |
-| 8 | #7 | **Exp-19: Full AMFU-Net + Raw + Cosine** | 19.03M | GPU Reflect | `0.2869` | `83.58%` | `25.38 px` | `7.36 px` | `85.96%` / `21.49 px` | `25.92 px` |
-| 9 | #12 | **Exp-13: U-Net + MFEF + CLAHE** | 16.68M | GPU Reflect | `0.2812` | `82.68%` | `21.78 px` | `7.66 px` | `86.93%` / `13.67 px` | `54.44 px` |
-| 10 | #10 | **Exp-30: U-Net + MFEF + Enhanced + Cosine** | 16.68M | GPU Reflect | `0.3061` | `82.89%` | `24.51 px` | `7.83 px` | `84.76%` / `19.45 px` | `57.75 px` 🚩 |
-| 11 | #13 | **Exp-18: Full AMFU-Net + CLAHE + Cosine** | 19.03M | GPU Reflect | `0.3002` | `82.48%` | `25.02 px` | `7.58 px` | `85.39%` / `21.56 px` | `42.05 px` |
-| 12 | #8 | **Exp-06: Full AMFU-Net + CLAHE Alone** | 19.03M | CPU OpenCV | `0.2807` | `83.19%` | `26.18 px` | `7.60 px` | `86.14%` / `21.38 px` | `38.22 px` |
-| 13 | #5 | **Exp-07: U-Net + DAG + CLAHE** | 6.19M | CPU OpenCV | `0.2854` | `83.98%` | `27.52 px` | `7.96 px` | `86.97%` / `21.32 px` | `45.86 px` |
-| 14 | #14 | **Exp-11: Full AMFU-Net + CLAHE** | 19.03M | GPU Reflect | `0.2967` | `82.34%` | `25.57 px` | `7.72 px` | `84.98%` / `21.95 px` | `25.37 px` |
-| 15 | #11 | **Exp-25: U-Net + DAG + Enhanced + Cosine** | **6.19M** | GPU Reflect | `0.2924` | `82.76%` | `26.75 px` | `7.96 px` | `84.35%` / `24.86 px` | **`15.08 px`** |
-| 16 | #10 | **Exp-08: U-Net + MFEF + CLAHE** | 16.68M | CPU OpenCV | `0.2842` | `82.84%` | `25.69 px` | `8.60 px` | `87.14%` / `16.90 px` | `60.04 px` |
-| 17 | #15 | **Exp-20: Full AMFU-Net + SRAD + Cosine** | 19.03M | GPU Reflect | `0.2983` | `82.12%` | `28.87 px` | `8.58 px` | `83.73%` / `26.50 px` | `26.67 px` |
-| 18 | #16 | **Exp-10: Full AMFU-Net + CLAHE (GPU)** | 19.03M | GPU Reflect | `0.3015` | `81.90%` | `27.63 px` | `8.59 px` | `84.86%` / `22.93 px` | `44.00 px` |
-| 19 | #18 | **Exp-21: Full AMFU-Net + Enhanced + Cosine** | 19.03M | GPU Reflect | `0.3122` | `81.51%` | `28.93 px` | `8.53 px` | `82.89%` / `27.30 px` | `24.02 px` |
-| 20 | #19 | **Exp-05: Full AMFU-Net + SRAD Alone** | 19.03M | CPU OpenCV | `0.3159` | `81.10%` | `29.53 px` | `8.87 px` | `83.26%` / `26.81 px` | `25.77 px` |
-| 21 | #20 | **Exp-22: Plain U-Net Baseline + Raw + Cosine** | 3.83M | GPU Reflect | `0.3212` | `81.02%` | `32.58 px` | `9.61 px` | `83.28%` / `23.92 px` | `75.99 px` |
-| 22 | #17 | **Exp-23: Plain U-Net Baseline + CLAHE + Cosine** | 3.83M | GPU Reflect | `0.3319` | `81.74%` | `33.95 px` | `9.87 px` | `84.35%` / `26.30 px` | `64.97 px` |
-| 23 | #24 | **Exp-27: Plain U-Net Baseline + SRAD + Cosine** | 3.83M | GPU Reflect | `0.3744` | `78.27%` | `33.01 px` | `10.44 px` | `81.53%` / `27.28 px` | `73.69 px` |
-| 24 | #22 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `80.03%` | `36.82 px` | `11.03 px` | `84.35%` / `25.15 px` | `75.10 px` |
-| 25 | #23 | **Exp-26: Plain U-Net Baseline + Enhanced + Cosine** | 3.83M | GPU Reflect | `0.3600` | `79.08%` | `38.93 px` | `11.91 px` | `81.84%` / `33.16 px` | `78.13 px` |
-| 26 | #21 | **Exp-09: Plain U-Net + CLAHE** | 3.83M | CPU OpenCV | `0.3354` | `80.04%` | `41.30 px` | `12.87 px` | `84.71%` / `32.02 px` | `77.03 px` |
+| 🥇 | #1 | **Exp-16: U-Net + DAG + Raw + Cosine** | **6.19M** | GPU Reflect | **`0.2580`** | **`85.19%`** | `20.72 px` | **`6.27 px`** | **`87.25%` / `15.05 px`** | **`30.09 px`** |
+| 🥈 | #3 | **Exp-31: U-Net + MFEF + Raw + Cosine** | 16.68M | GPU Reflect | `0.2729` | `84.65%` | **`18.75 px`** | **`6.27 px`** | **`87.11%` / `15.54 px`** | `32.31 px` |
+| 🥉 | #9 | **Exp-29: U-Net + MFEF + CLAHE + Cosine** | 16.68M | GPU Reflect | `0.2931` | `83.58%` | `20.81 px` | `6.70 px` | `86.03%` / `14.44 px` | `41.58 px` |
+| 4 | #5 | **Exp-17: U-Net + DAG + CLAHE + Cosine** | **6.19M** | GPU Reflect | `0.2791` | `84.15%` | `23.62 px` | `7.05 px` | `86.29%` / `20.21 px` | `33.27 px` |
+| 5 | #4 | **Exp-15: U-Net + DAG + Raw + StepLR** | **6.19M** | GPU Reflect | `0.2994` | `84.16%` | `23.45 px` | `7.19 px` | `87.16%` / `18.38 px` | `28.84 px` |
+| 6 | #10 | **Exp-24: U-Net + DAG + SRAD + Cosine** | **6.19M** | GPU Reflect | `0.3095` | `82.86%` | `22.77 px` | `6.95 px` | `84.37%` / `20.41 px` | `29.20 px` |
+| 7 | #2 | **Exp-28: U-Net + MFEF + SRAD + Cosine** | 16.68M | GPU Reflect | **`0.2550`** | `84.75%` | `23.70 px` | `7.59 px` | `86.57%` / `18.71 px` | `44.52 px` 🚩 |
+| 8 | #7 | **Exp-12: U-Net + DAG + CLAHE** | **6.19M** | GPU Reflect | `0.2741` | `83.68%` | `24.60 px` | `7.15 px` | `86.94%` / `18.38 px` | `36.74 px` |
+| 9 | #8 | **Exp-19: Full AMFU-Net + Raw + Cosine** | 19.03M | GPU Reflect | `0.2869` | `83.58%` | `25.38 px` | `7.36 px` | `85.96%` / `21.49 px` | `25.92 px` |
+| 10 | #13 | **Exp-13: U-Net + MFEF + CLAHE** | 16.68M | GPU Reflect | `0.2812` | `82.68%` | `21.78 px` | `7.66 px` | `86.93%` / `13.67 px` | `54.44 px` |
+| 11 | #11 | **Exp-30: U-Net + MFEF + Enhanced + Cosine** | 16.68M | GPU Reflect | `0.3061` | `82.89%` | `24.51 px` | `7.83 px` | `84.76%` / `19.45 px` | `57.75 px` 🚩 |
+| 12 | #14 | **Exp-18: Full AMFU-Net + CLAHE + Cosine** | 19.03M | GPU Reflect | `0.3002` | `82.48%` | `25.02 px` | `7.58 px` | `85.39%` / `21.56 px` | `42.05 px` |
+| 13 | #9 | **Exp-06: Full AMFU-Net + CLAHE Alone** | 19.03M | CPU OpenCV | `0.2807` | `83.19%` | `26.18 px` | `7.60 px` | `86.14%` / `21.38 px` | `38.22 px` |
+| 14 | #6 | **Exp-07: U-Net + DAG + CLAHE** | 6.19M | CPU OpenCV | `0.2854` | `83.98%` | `27.52 px` | `7.96 px` | `86.97%` / `21.32 px` | `45.86 px` |
+| 15 | #15 | **Exp-11: Full AMFU-Net + CLAHE** | 19.03M | GPU Reflect | `0.2967` | `82.34%` | `25.57 px` | `7.72 px` | `84.98%` / `21.95 px` | `25.37 px` |
+| 16 | #12 | **Exp-25: U-Net + DAG + Enhanced + Cosine** | **6.19M** | GPU Reflect | `0.2924` | `82.76%` | `26.75 px` | `7.96 px` | `84.35%` / `24.86 px` | **`15.08 px`** |
+| 17 | #11 | **Exp-08: U-Net + MFEF + CLAHE** | 16.68M | CPU OpenCV | `0.2842` | `82.84%` | `25.69 px` | `8.60 px` | `87.14%` / `16.90 px` | `60.04 px` |
+| 18 | #16 | **Exp-20: Full AMFU-Net + SRAD + Cosine** | 19.03M | GPU Reflect | `0.2983` | `82.12%` | `28.87 px` | `8.58 px` | `83.73%` / `26.50 px` | `26.67 px` |
+| 19 | #17 | **Exp-10: Full AMFU-Net + CLAHE (GPU)** | 19.03M | GPU Reflect | `0.3015` | `81.90%` | `27.63 px` | `8.59 px` | `84.86%` / `22.93 px` | `44.00 px` |
+| 20 | #19 | **Exp-21: Full AMFU-Net + Enhanced + Cosine** | 19.03M | GPU Reflect | `0.3122` | `81.51%` | `28.93 px` | `8.53 px` | `82.89%` / `27.30 px` | `24.02 px` |
+| 21 | #20 | **Exp-05: Full AMFU-Net + SRAD Alone** | 19.03M | CPU OpenCV | `0.3159` | `81.10%` | `29.53 px` | `8.87 px` | `83.26%` / `26.81 px` | `25.77 px` |
+| 22 | #21 | **Exp-22: Plain U-Net Baseline + Raw + Cosine** | 3.83M | GPU Reflect | `0.3212` | `81.02%` | `32.58 px` | `9.61 px` | `83.28%` / `23.92 px` | `75.99 px` |
+| 23 | #18 | **Exp-23: Plain U-Net Baseline + CLAHE + Cosine** | 3.83M | GPU Reflect | `0.3319` | `81.74%` | `33.95 px` | `9.87 px` | `84.35%` / `26.30 px` | `64.97 px` |
+| 24 | #25 | **Exp-27: Plain U-Net Baseline + SRAD + Cosine** | 3.83M | GPU Reflect | `0.3744` | `78.27%` | `33.01 px` | `10.44 px` | `81.53%` / `27.28 px` | `73.69 px` |
+| 25 | #23 | **Exp-14: Plain U-Net Baseline + CLAHE** | 3.83M | GPU Reflect | `0.3326` | `80.03%` | `36.82 px` | `11.03 px` | `84.35%` / `25.15 px` | `75.10 px` |
+| 26 | #24 | **Exp-26: Plain U-Net Baseline + Enhanced + Cosine** | 3.83M | GPU Reflect | `0.3600` | `79.08%` | `38.93 px` | `11.91 px` | `81.84%` / `33.16 px` | `78.13 px` |
+| 27 | #22 | **Exp-09: Plain U-Net + CLAHE** | 3.83M | CPU OpenCV | `0.3354` | `80.04%` | `41.30 px` | `12.87 px` | `84.71%` / `32.02 px` | `77.03 px` |
 
 
 

@@ -477,6 +477,18 @@ Experiment Summary:
      * Dual Enhanced Degradation: Consistent with all other architectures, dual enhancement trails single-stage modalities (SRAD Exp-28: 84.75% Dice; CLAHE Exp-29: 83.58% Dice; Dual Enhanced Exp-30: 82.89% Dice).
      * External Generalization Gap: On BUS_UCLM, HD95 explodes to 57.75 px. Without DAG attention gating on skip connections, un-gated decoders suffer boundary leakage when exposed to multi-scale features under compounded classical filtering.
 
+31. Exp-31 (U-Net + MFEF on Raw Ultrasound with Cosine Annealing; 16,681,633 parameters; DAG disabled, MFEF enabled; raw_image; CosineAnnealingLR eta_min=1e-5):
+   - Metrics: 0.8465 Dice (84.65%), 0.7652 Jaccard (76.52%), 18.75 px HD95, 6.27 px ASD, 0.2729 Loss.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8711 (87.11%, 15.54 px HD95, 4.81 px ASD)
+     * BUSI = 0.7973 (79.73%, 24.68 px HD95, 9.23 px ASD)
+     * BUS_UCLM = 0.7570 (75.70%, 32.31 px HD95, 11.36 px ASD)
+   - Historic Breakthrough & Master Milestone:
+     * 🥈 Clinical Rank #2 Overall (MICCAI R-Sum = 5: Dice #3, 95HD #1, ASD #1):
+     * All-Time 95HD Record: Breaks the 20 px barrier for the entire study (18.75 px HD95 overall, beating Champion Exp-16's 20.72 px).
+     * All-Time ASD Record: Ties Champion Exp-16 for the sharpest average boundary distance (6.27 px ASD).
+     * Closes the 16th and Final Cell of the 4x4 Factorial Ablation Matrix under CosineAnnealingLR + GPU Reflection.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
