@@ -316,6 +316,26 @@ Across all systematic ablation runs evaluated on 266 immutable internal test sca
 | 26 | #24 | **Exp-26: Plain U-Net Baseline + Enhanced + Cosine** | 3.83M | GPU Reflect | `0.3600` | `79.08%` | `38.93 px` | `11.91 px` | `81.84%` / `33.16 px` | `78.13 px` |
 | 27 | #22 | **Exp-09: Plain U-Net + CLAHE** | 3.83M | CPU OpenCV | `0.3354` | `80.04%` | `41.30 px` | `12.87 px` | `84.71%` / `32.02 px` | `77.03 px` |
 
+---
+
+## 7. External Industry-Standard Baselines (Handheld B-Mode Ultrasound)
+
+To benchmark our findings on handheld B-mode ultrasound against standard open-source medical segmentation libraries, external baseline models are evaluated under identical training conditions (`CosineAnnealingLR`, 200 epochs, seed 42, GPU reflection padding) on `Ahorts/G17-preprocessed-dataset` (266 immutable held-out test scans).
+
+> [!NOTE] Separate Evaluation Scope
+> These baseline runs are maintained in this independent section and are **not** mixed into the official AMFU-Net factorial ablation matrix (Section 6). They characterize external library behavior on handheld B-mode ultrasound, distinct from the private paired USCT dataset in Chen et al. (2026).
+
+### 7.1 Baseline Performance Matrix
+
+| Baseline ID | Architecture | Framework | Initialization | Modality | Test Loss | Test Dice | 95% HD (px) | ASD (px) | Primary (`BUS_BRA`) | External (`BUS_UCLM` 95HD) |
+| :--- | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Baseline-01** | **Attention U-Net (Oktay et al., 2018)** | MONAI | From Scratch | Raw (`raw_image`) | **`0.2268`** | **`87.02%`** | **`16.35 px`** | **`5.31 px`** | **`89.15%` / `12.58 px`** | **`20.54 px`** |
+
+#### Multi-Center Cohort Breakdown
+- **`BUS_BRA` (n=186):** `89.15%` Dice | `81.63%` IoU | `12.58 px` 95HD | `3.73 px` ASD
+- **`BUSI` (n=64):** `81.06%` Dice | `73.09%` IoU | `26.24 px` 95HD | `9.72 px` ASD
+- **`BUS_UCLM` (n=16):** `86.07%` Dice | `77.18%` IoU | `20.54 px` 95HD | `6.07 px` ASD
+
 
 
 

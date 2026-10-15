@@ -489,6 +489,19 @@ Experiment Summary:
      * All-Time ASD Record: Ties Champion Exp-16 for the sharpest average boundary distance (6.27 px ASD).
      * Closes the 16th and Final Cell of the 4x4 Factorial Ablation Matrix under CosineAnnealingLR + GPU Reflection.
 
+32. Baseline-01: MONAI Attention U-Net (Oktay et al., 2018; monai.networks.nets.AttentionUnet; trained from scratch; raw_image [B-mode handheld ultrasound]; CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans), distinct from the private paired USCT tomographic dataset in Chen et al. (2026).
+   - Metrics: 0.8702 Dice (87.02%), 0.7930 Jaccard (79.30%), 16.35 px HD95, 5.31 px ASD, 0.2268 Loss.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8915 (89.15%, 12.58 px HD95, 3.73 px ASD)
+     * BUSI = 0.8106 (81.06%, 26.24 px HD95, 9.72 px ASD)
+     * BUS_UCLM = 0.8607 (86.07%, 20.54 px HD95, 6.07 px ASD)
+   - Benchmark Comparison on B-mode Handheld Ultrasound:
+     * Outperforms adapted AMFU-Net variants across all metrics on this cohort: +1.83% Dice / -4.37 px HD95 vs Exp-16 (U-Net + DAG), +2.37% Dice / -2.40 px HD95 vs Exp-31 (U-Net + MFEF), +3.44% Dice / -9.03 px HD95 vs Exp-19 (Full AMFU-Net on Raw).
+   - Artifacts:
+     * Checkpoint and results pushed to HF branch: `baseline-monai-att-unet-raw-cosine`.
+     * Local test CSV: `tracking/baseline_monai_att_unet_raw_cosine_internal_test.csv`.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
