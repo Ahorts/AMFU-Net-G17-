@@ -329,12 +329,22 @@ To benchmark our findings on handheld B-mode ultrasound against standard open-so
 
 | Baseline ID | Architecture | Framework | Initialization | Modality | Test Loss | Test Dice | 95% HD (px) | ASD (px) | Primary (`BUS_BRA`) | External (`BUS_UCLM` 95HD) |
 | :--- | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Baseline-01** | **Attention U-Net (Oktay et al., 2018)** | MONAI | From Scratch | Raw (`raw_image`) | **`0.2268`** | **`87.02%`** | **`16.35 px`** | **`5.31 px`** | **`89.15%` / `12.58 px`** | **`20.54 px`** |
+| **Baseline-01** | **Attention U-Net (Oktay et al., 2018)** | MONAI | From Scratch | Raw (`raw_image`) | **`0.2143`** | **`86.90%`** | **`17.26 px`** | **`5.31 px`** | **`89.28%` / `12.88 px`** | `33.64 px` |
+| **Baseline-02** | **Attention U-Net (Oktay et al., 2018)** | MONAI | From Scratch | Enhanced (`image`) | `0.2385` | `85.72%` | `18.98 px` | `6.03 px` | `87.99%` / `15.34 px` | **`31.63 px`** |
 
 #### Multi-Center Cohort Breakdown
-- **`BUS_BRA` (n=186):** `89.15%` Dice | `81.63%` IoU | `12.58 px` 95HD | `3.73 px` ASD
-- **`BUSI` (n=64):** `81.06%` Dice | `73.09%` IoU | `26.24 px` 95HD | `9.72 px` ASD
-- **`BUS_UCLM` (n=16):** `86.07%` Dice | `77.18%` IoU | `20.54 px` 95HD | `6.07 px` ASD
+- **Baseline-01 (Raw Ultrasound):**
+  - `BUS_BRA` (n=186): `89.28%` Dice | `81.50%` IoU | `12.88 px` 95HD | `3.86 px` ASD
+  - `BUSI` (n=64): `80.40%` Dice | `71.52%` IoU | `25.91 px` 95HD | `8.70 px` ASD
+  - `BUS_UCLM` (n=16): `85.22%` Dice | `76.64%` IoU | `33.64 px` 95HD | `8.66 px` ASD
+- **Baseline-02 (Dual Enhanced: SRAD + CLAHE):**
+  - `BUS_BRA` (n=186): `87.99%` Dice | `80.13%` IoU | `15.34 px` 95HD | `4.43 px` ASD
+  - `BUSI` (n=64): `79.40%` Dice | `70.66%` IoU | `26.41 px` 95HD | `9.88 px` ASD
+  - `BUS_UCLM` (n=16): `84.58%` Dice | `75.22%` IoU | `31.63 px` 95HD | `9.24 px` ASD
+
+#### Empirical Observations:
+1. **Universal Preprocessing Impact:** Stacking SRAD + CLAHE reduces volume overlap (-1.18% Dice) and increases boundary distance (+1.72 px 95HD) on MONAI Attention U-Net, consistent with the degradation trend documented in the AMFU-Net ablation matrix.
+2. **Domain Robustness:** MONAI Attention U-Net maintains >84.5% Dice across external hospital scanners (`BUS_UCLM`) under both modalities.
 
 
 

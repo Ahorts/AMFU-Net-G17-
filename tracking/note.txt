@@ -489,18 +489,30 @@ Experiment Summary:
      * All-Time ASD Record: Ties Champion Exp-16 for the sharpest average boundary distance (6.27 px ASD).
      * Closes the 16th and Final Cell of the 4x4 Factorial Ablation Matrix under CosineAnnealingLR + GPU Reflection.
 
-32. Baseline-01: MONAI Attention U-Net (Oktay et al., 2018; monai.networks.nets.AttentionUnet; trained from scratch; raw_image [B-mode handheld ultrasound]; CosineAnnealingLR eta_min=1e-5, 200 epochs):
+32. Baseline-01: MONAI Attention U-Net on Raw Ultrasound (Oktay et al., 2018; monai.networks.nets.AttentionUnet; trained from scratch; raw_image; CosineAnnealingLR eta_min=1e-5, 200 epochs):
    - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans), distinct from the private paired USCT tomographic dataset in Chen et al. (2026).
-   - Metrics: 0.8702 Dice (87.02%), 0.7930 Jaccard (79.30%), 16.35 px HD95, 5.31 px ASD, 0.2268 Loss.
+   - Metrics: 0.8690 Dice (86.90%), 0.7880 Jaccard (78.80%), 17.26 px HD95, 5.31 px ASD, 0.2143 Loss. Best Checkpoint: checkpoint-17000.
    - Cohort Breakdown:
-     * BUS_BRA = 0.8915 (89.15%, 12.58 px HD95, 3.73 px ASD)
-     * BUSI = 0.8106 (81.06%, 26.24 px HD95, 9.72 px ASD)
-     * BUS_UCLM = 0.8607 (86.07%, 20.54 px HD95, 6.07 px ASD)
+     * BUS_BRA = 0.8928 (89.28%, 12.88 px HD95, 3.86 px ASD)
+     * BUSI = 0.8040 (80.40%, 25.91 px HD95, 8.70 px ASD)
+     * BUS_UCLM = 0.8522 (85.22%, 33.64 px HD95, 8.66 px ASD)
    - Benchmark Comparison on B-mode Handheld Ultrasound:
-     * Outperforms adapted AMFU-Net variants across all metrics on this cohort: +1.83% Dice / -4.37 px HD95 vs Exp-16 (U-Net + DAG), +2.37% Dice / -2.40 px HD95 vs Exp-31 (U-Net + MFEF), +3.44% Dice / -9.03 px HD95 vs Exp-19 (Full AMFU-Net on Raw).
+     * Outperforms adapted AMFU-Net variants across all metrics on this cohort: +1.71% Dice / -3.46 px HD95 vs Exp-16 (U-Net + DAG), +2.25% Dice / -1.49 px HD95 vs Exp-31 (U-Net + MFEF), +3.32% Dice / -8.12 px HD95 vs Exp-19 (Full AMFU-Net on Raw).
    - Artifacts:
-     * Checkpoint and results pushed to HF branch: `baseline-monai-att-unet-raw-cosine`.
      * Local test CSV: `tracking/baseline_monai_att_unet_raw_cosine_internal_test.csv`.
+
+33. Baseline-02: MONAI Attention U-Net on Dual Enhanced [SRAD + CLAHE] (Oktay et al., 2018; monai.networks.nets.AttentionUnet; trained from scratch; image; CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8572 Dice (85.72%), 0.7756 Jaccard (77.56%), 18.98 px HD95, 6.03 px ASD, 0.2385 Loss. Best Checkpoint: checkpoint-17750.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8799 (87.99%, 15.34 px HD95, 4.43 px ASD)
+     * BUSI = 0.7940 (79.40%, 26.41 px HD95, 9.88 px ASD)
+     * BUS_UCLM = 0.8458 (84.58%, 31.63 px HD95, 9.24 px ASD)
+   - Cross-Modality Comparison:
+     * Dual enhancement degrades MONAI Attention U-Net: -1.18% Dice (85.72% vs 86.90%), +1.72 px HD95 (18.98 px vs 17.26 px), +0.72 px ASD (6.03 px vs 5.31 px).
+     * Re-confirms the Preprocessing Degradation Law on third-party medical architectures: Raw acoustic speckle provides superior boundary representations compared to compounded classical filtering (SRAD + CLAHE).
+   - Artifacts:
+     * Local test CSV: `tracking/baseline_monai_att_unet_enhanced_cosine_internal_test.csv`.
 
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
