@@ -527,6 +527,19 @@ Experiment Summary:
    - Artifacts:
      * Local test CSV: `tracking/baseline_monai_att_unet_clahe_only_cosine_internal_test.csv`.
 
+35. Baseline-04: MONAI Attention U-Net on SRAD Alone (Oktay et al., 2018; monai.networks.nets.AttentionUnet; trained from scratch; srad_image; CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8705 Dice (87.05%), 0.7928 Jaccard (79.28%), 17.32 px HD95, 5.52 px ASD, 0.2166 Loss. Best Checkpoint: checkpoint-19750.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8915 (89.15%, 12.62 px HD95, 3.76 px ASD)
+     * BUSI = 0.8095 (80.95%, 30.25 px HD95, 10.56 px ASD)
+     * BUS_UCLM = 0.8700 (87.00%, 20.20 px HD95, 5.79 px ASD)
+   - Cross-Modality Comparison:
+     * Achieves highest volume overlap (87.05% Dice) across all baseline runs, beating Raw (86.90%) and CLAHE (86.73%) and crushing Dual Enhanced (85.72%).
+     * Closes the 4-modality matrix for MONAI Attention U-Net under identical Cosine Annealing conditions.
+   - Artifacts:
+     * Local test CSV: `tracking/baseline_monai_att_unet_srad_only_cosine_internal_test.csv`.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).

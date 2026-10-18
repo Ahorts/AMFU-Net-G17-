@@ -329,9 +329,10 @@ To benchmark our findings on handheld B-mode ultrasound against standard open-so
 
 | Baseline ID | Architecture | Framework | Initialization | Modality | Test Loss | Test Dice | 95% HD (px) | ASD (px) | Primary (`BUS_BRA`) | External (`BUS_UCLM` 95HD) |
 | :--- | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Baseline-01** | **Attention U-Net (Oktay et al., 2018)** | MONAI | From Scratch | Raw (`raw_image`) | **`0.2143`** | **`86.90%`** | `17.26 px` | `5.31 px` | **`89.28%` / `12.88 px`** | `33.64 px` |
+| **Baseline-01** | **Attention U-Net (Oktay et al., 2018)** | MONAI | From Scratch | Raw (`raw_image`) | **`0.2143`** | `86.90%` | `17.26 px` | `5.31 px` | **`89.28%` / `12.88 px`** | `33.64 px` |
 | **Baseline-02** | **Attention U-Net (Oktay et al., 2018)** | MONAI | From Scratch | Enhanced (`image`) | `0.2385` | `85.72%` | `18.98 px` | `6.03 px` | `87.99%` / `15.34 px` | `31.63 px` |
 | **Baseline-03** | **Attention U-Net (Oktay et al., 2018)** | MONAI | From Scratch | CLAHE Alone (`clahe_image`) | `0.2219` | `86.73%` | **`15.80 px`** | **`5.18 px`** | `88.79%` / `13.10 px` | **`12.50 px`** |
+| **Baseline-04** | **Attention U-Net (Oktay et al., 2018)** | MONAI | From Scratch | SRAD Alone (`srad_image`) | `0.2166` | **`87.05%`** | `17.32 px` | `5.52 px` | `89.15%` / `12.62 px` | `20.20 px` |
 
 #### Multi-Center Cohort Breakdown
 - **Baseline-01 (Raw Ultrasound):**
@@ -346,11 +347,15 @@ To benchmark our findings on handheld B-mode ultrasound against standard open-so
   - `BUS_BRA` (n=186): `88.79%` Dice | `81.37%` IoU | `13.10 px` 95HD | `3.84 px` ASD
   - `BUSI` (n=64): `80.39%` Dice | `72.34%` IoU | `24.49 px` 95HD | `9.39 px` ASD
   - `BUS_UCLM` (n=16): `88.16%` Dice | `81.09%` IoU | `12.50 px` 95HD | `3.88 px` ASD
+- **Baseline-04 (SRAD Alone):**
+  - `BUS_BRA` (n=186): `89.15%` Dice | `81.50%` IoU | `12.62 px` 95HD | `3.76 px` ASD
+  - `BUSI` (n=64): `80.95%` Dice | `72.84%` IoU | `30.25 px` 95HD | `10.56 px` ASD
+  - `BUS_UCLM` (n=16): `87.00%` Dice | `79.26%` IoU | `20.20 px` 95HD | `5.79 px` ASD
 
 #### Empirical Observations:
-1. **Universal Preprocessing Impact:** Stacking SRAD + CLAHE produces the lowest volume overlap (85.72% Dice) and highest boundary errors (18.98 px 95HD, 6.03 px ASD) on MONAI Attention U-Net. Single-source inputs (Raw: 86.90% Dice; CLAHE Alone: 86.73% Dice) consistently outperform compounded filtering.
-2. **Boundary Sharpness on CLAHE:** CLAHE alone achieves the sharpest boundary metric in the baseline series (15.80 px 95HD, 5.18 px ASD) and demonstrates exceptional out-of-distribution boundary precision on `BUS_UCLM` (12.50 px 95HD, 88.16% Dice).
-3. **Domain Robustness:** MONAI Attention U-Net demonstrates stable cross-center performance across all three modalities (>84.5% Dice on `BUS_UCLM`).
+1. **Universal Preprocessing Impact:** Stacking SRAD + CLAHE produces the lowest volume overlap (85.72% Dice) and highest boundary errors (18.98 px 95HD, 6.03 px ASD) on MONAI Attention U-Net. Single-source inputs (SRAD Alone: 87.05% Dice; Raw: 86.90% Dice; CLAHE Alone: 86.73% Dice) consistently outperform compounded filtering by >1.0% to 1.33% Dice.
+2. **Boundary Sharpness vs Area Overlap Tradeoff:** While SRAD Alone achieves the highest overall volume overlap (87.05% Dice), CLAHE Alone achieves significantly sharper boundary localization (15.80 px 95HD vs 17.32 px for SRAD and 18.98 px for Enhanced) and the sharpest out-of-distribution boundary precision on `BUS_UCLM` (12.50 px 95HD).
+3. **Closure of MONAI Attention U-Net 4-Modality Battery:** The 4-modality matrix for MONAI Attention U-Net is completely evaluated, establishing external library benchmarks across Raw, Enhanced, CLAHE, and SRAD.
 
 
 
