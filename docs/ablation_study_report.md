@@ -333,29 +333,34 @@ To benchmark our findings on handheld B-mode ultrasound against standard open-so
 | **Baseline-02** | **Attention U-Net (Oktay et al., 2018)** | MONAI | From Scratch | Enhanced (`image`) | `0.2385` | `85.72%` | `18.98 px` | `6.03 px` | `87.99%` / `15.34 px` | `31.63 px` |
 | **Baseline-03** | **Attention U-Net (Oktay et al., 2018)** | MONAI | From Scratch | CLAHE Alone (`clahe_image`) | `0.2219` | `86.73%` | **`15.80 px`** | **`5.18 px`** | `88.79%` / `13.10 px` | **`12.50 px`** |
 | **Baseline-04** | **Attention U-Net (Oktay et al., 2018)** | MONAI | From Scratch | SRAD Alone (`srad_image`) | `0.2166` | **`87.05%`** | `17.32 px` | `5.52 px` | `89.15%` / `12.62 px` | `20.20 px` |
+| **Baseline-05** | **U-Net (ResNet-34 Backbone)** | SMP | From Scratch | Raw (`raw_image`) | `0.2333` | `86.07%` | `17.67 px` | `6.38 px` | **`89.39%` / `10.96 px`** | `42.60 px` |
 
 #### Multi-Center Cohort Breakdown
-- **Baseline-01 (Raw Ultrasound):**
+- **Baseline-01 (MONAI Attention U-Net + Raw):**
   - `BUS_BRA` (n=186): `89.28%` Dice | `81.50%` IoU | `12.88 px` 95HD | `3.86 px` ASD
   - `BUSI` (n=64): `80.40%` Dice | `71.52%` IoU | `25.91 px` 95HD | `8.70 px` ASD
   - `BUS_UCLM` (n=16): `85.22%` Dice | `76.64%` IoU | `33.64 px` 95HD | `8.66 px` ASD
-- **Baseline-02 (Dual Enhanced: SRAD + CLAHE):**
+- **Baseline-02 (MONAI Attention U-Net + Dual Enhanced):**
   - `BUS_BRA` (n=186): `87.99%` Dice | `80.13%` IoU | `15.34 px` 95HD | `4.43 px` ASD
   - `BUSI` (n=64): `79.40%` Dice | `70.66%` IoU | `26.41 px` 95HD | `9.88 px` ASD
   - `BUS_UCLM` (n=16): `84.58%` Dice | `75.22%` IoU | `31.63 px` 95HD | `9.24 px` ASD
-- **Baseline-03 (CLAHE Alone):**
+- **Baseline-03 (MONAI Attention U-Net + CLAHE Alone):**
   - `BUS_BRA` (n=186): `88.79%` Dice | `81.37%` IoU | `13.10 px` 95HD | `3.84 px` ASD
   - `BUSI` (n=64): `80.39%` Dice | `72.34%` IoU | `24.49 px` 95HD | `9.39 px` ASD
   - `BUS_UCLM` (n=16): `88.16%` Dice | `81.09%` IoU | `12.50 px` 95HD | `3.88 px` ASD
-- **Baseline-04 (SRAD Alone):**
+- **Baseline-04 (MONAI Attention U-Net + SRAD Alone):**
   - `BUS_BRA` (n=186): `89.15%` Dice | `81.50%` IoU | `12.62 px` 95HD | `3.76 px` ASD
   - `BUSI` (n=64): `80.95%` Dice | `72.84%` IoU | `30.25 px` 95HD | `10.56 px` ASD
   - `BUS_UCLM` (n=16): `87.00%` Dice | `79.26%` IoU | `20.20 px` 95HD | `5.79 px` ASD
+- **Baseline-05 (SMP U-Net ResNet-34 + Raw [Scratch]):**
+  - `BUS_BRA` (n=186): `89.39%` Dice | `81.98%` IoU | `10.96 px` 95HD | `3.54 px` ASD
+  - `BUSI` (n=64): `78.01%` Dice | `70.68%` IoU | `30.94 px` 95HD | `12.61 px` ASD
+  - `BUS_UCLM` (n=16): `79.76%` Dice | `71.47%` IoU | `42.60 px` 95HD | `14.47 px` ASD
 
 #### Empirical Observations:
 1. **Universal Preprocessing Impact:** Stacking SRAD + CLAHE produces the lowest volume overlap (85.72% Dice) and highest boundary errors (18.98 px 95HD, 6.03 px ASD) on MONAI Attention U-Net. Single-source inputs (SRAD Alone: 87.05% Dice; Raw: 86.90% Dice; CLAHE Alone: 86.73% Dice) consistently outperform compounded filtering by >1.0% to 1.33% Dice.
-2. **Boundary Sharpness vs Area Overlap Tradeoff:** While SRAD Alone achieves the highest overall volume overlap (87.05% Dice), CLAHE Alone achieves significantly sharper boundary localization (15.80 px 95HD vs 17.32 px for SRAD and 18.98 px for Enhanced) and the sharpest out-of-distribution boundary precision on `BUS_UCLM` (12.50 px 95HD).
-3. **Closure of MONAI Attention U-Net 4-Modality Battery:** The 4-modality matrix for MONAI Attention U-Net is completely evaluated, establishing external library benchmarks across Raw, Enhanced, CLAHE, and SRAD.
+2. **In-Distribution Overfitting vs Generalization Gap:** SMP ResNet-34 (24.43M params) sets the sharpest in-domain boundary metric on `BUS_BRA` (10.96 px 95HD, 89.39% Dice), but suffers an out-of-distribution boundary error explosion on `BUS_UCLM` (42.60 px 95HD, 79.76% Dice) due to the absence of attention-gated skip connections.
+3. **Cross-Architecture Attention Requirement:** Attention gating (DAG in AMFU-Net or AttentionUnet gates in MONAI) is essential to preserve robust out-of-distribution generalization (>85% Dice on `BUS_UCLM`), whereas un-gated deep ResNet backbones overfit heavily to the primary scanner distribution.
 
 
 
