@@ -336,6 +336,7 @@ To benchmark our findings on handheld B-mode ultrasound against standard open-so
 | **Baseline-05** | **U-Net (ResNet-34 Backbone)** | SMP | From Scratch | Raw (`raw_image`) | `0.2333` | `86.07%` | `17.67 px` | `6.38 px` | **`89.39%` / `10.96 px`** | `42.60 px` |
 | **Baseline-06** | **U-Net (ResNet-34 Backbone)** | SMP | From Scratch | Enhanced (`image`) | `0.2512` | `84.08%` | `18.03 px` | `6.86 px` | `85.92%` / `13.89 px` | **`5.93 px`** |
 | **Baseline-07** | **U-Net (ResNet-34 Backbone)** | SMP | From Scratch | CLAHE Alone (`clahe_image`) | **`0.2146`** | `86.97%` | **`14.41 px`** | **`4.99 px`** | `89.18%` / `10.72 px` | `19.94 px` |
+| **Baseline-08** | **U-Net (ResNet-34 Backbone)** | SMP | From Scratch | SRAD Alone (`srad_image`) | `0.2212` | `86.45%` | `15.63 px` | `5.50 px` | `88.80%` / `11.70 px` | `21.87 px` |
 
 #### Multi-Center Cohort Breakdown
 - **Baseline-01 (MONAI Attention U-Net + Raw):**
@@ -366,6 +367,10 @@ To benchmark our findings on handheld B-mode ultrasound against standard open-so
   - `BUS_BRA` (n=186): `89.18%` Dice | `82.04%` IoU | `10.72 px` 95HD | `3.45 px` ASD
   - `BUSI` (n=64): `80.47%` Dice | `72.62%` IoU | `23.74 px` 95HD | `8.91 px` ASD
   - `BUS_UCLM` (n=16): `87.25%` Dice | `80.30%` IoU | `19.94 px` 95HD | `7.20 px` ASD
+- **Baseline-08 (SMP U-Net ResNet-34 + SRAD Alone [Scratch]):**
+  - `BUS_BRA` (n=186): `88.80%` Dice | `81.34%` IoU | `11.70 px` 95HD | `3.56 px` ASD
+  - `BUSI` (n=64): `79.73%` Dice | `72.40%` IoU | `25.49 px` 95HD | `10.92 px` ASD
+  - `BUS_UCLM` (n=16): `86.12%` Dice | `78.78%` IoU | `21.87 px` 95HD | `6.37 px` ASD
 
 #### Empirical Observations:
 1. **Universal Preprocessing Impact:** Stacking SRAD + CLAHE produces the lowest volume overlap (85.72% Dice) and highest boundary errors (18.98 px 95HD, 6.03 px ASD) on MONAI Attention U-Net. Single-source inputs (SRAD Alone: 87.05% Dice; Raw: 86.90% Dice; CLAHE Alone: 86.73% Dice) consistently outperform compounded filtering by >1.0% to 1.33% Dice.
