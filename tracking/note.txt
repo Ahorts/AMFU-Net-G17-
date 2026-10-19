@@ -565,6 +565,20 @@ Experiment Summary:
    - Artifacts:
      * Local test CSV: `tracking/baseline_smp_unet_resnet34_scratch_enhanced_cosine_internal_test.csv`.
 
+38. Baseline-07: SMP U-Net with ResNet-34 Backbone on CLAHE Alone (Yakubovskiy, 2020; segmentation_models_pytorch; trained from scratch; clahe_image; CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8697 Dice (86.97%), 0.7967 Jaccard (79.67%), 14.41 px HD95, 4.99 px ASD, 0.2146 Loss. Best Checkpoint: checkpoint-25750. Parameters: 24,430,097.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8918 (89.18%, 10.72 px HD95, 3.45 px ASD)
+     * BUSI = 0.8047 (80.47%, 23.74 px HD95, 8.91 px ASD)
+     * BUS_UCLM = 0.8725 (87.25%, 19.94 px HD95, 7.20 px ASD)
+   - Cross-Modality Comparison:
+     * Achieves highest volume overlap (86.97% Dice) and lowest test loss (0.2146) across all SMP U-Net configurations.
+     * Sets the lowest boundary localization error (14.41 px HD95) and lowest surface error (4.99 px ASD) among all external baseline models evaluated.
+     * Overcomes the domain collapse of Baseline-05 on BUS_UCLM (improving HD95 from 42.60 px on Raw to 19.94 px on CLAHE) while improving BUSI Dice to 80.47%.
+   - Artifacts:
+     * Local test CSV: `tracking/baseline_smp_unet_resnet34_scratch_clahe_only_cosine_internal_test.csv`.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
