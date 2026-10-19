@@ -592,6 +592,20 @@ Experiment Summary:
    - Artifacts:
      * Local test CSV: `tracking/baseline_smp_unet_resnet34_scratch_srad_only_cosine_internal_test.csv`.
 
+40. Baseline-09: SMP U-Net++ (Nested U-Net) with ResNet-34 Backbone on Raw Ultrasound (Zhou et al., 2018; segmentation_models_pytorch; trained from scratch; raw_image; CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8792 Dice (87.92%), 0.8074 Jaccard (80.74%), 13.25 px HD95, 4.39 px ASD, 0.2045 Loss. Best Checkpoint: checkpoint-30500. Parameters: 26,072,337.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.9003 (90.03%, 10.28 px HD95, 3.12 px ASD)
+     * BUSI = 0.8116 (81.16%, 22.27 px HD95, 8.33 px ASD)
+     * BUS_UCLM = 0.9042 (90.42%, 11.72 px HD95, 3.42 px ASD)
+   - Benchmark Analysis:
+     * Establishes the highest volume overlap (87.92% Dice, 80.74% IoU), lowest test loss (0.2045), and lowest boundary errors (13.25 px HD95, 4.39 px ASD) among all external baselines tested.
+     * The nested dense skip pathways in U-Net++ eliminate the multi-center generalization penalty observed in standard U-Net with ResNet-34 (Baseline-05 on Raw had 42.60 px HD95 on BUS_UCLM, reduced to 11.72 px on U-Net++).
+     * Breaks the 90% Dice barrier on both BUS_BRA (90.03%) and external hospital center BUS_UCLM (90.42%).
+   - Artifacts:
+     * Local test CSV: `tracking/baseline_smp_unetplusplus_resnet34_scratch_raw_cosine_internal_test.csv`.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
