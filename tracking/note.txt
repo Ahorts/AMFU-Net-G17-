@@ -617,6 +617,17 @@ Experiment Summary:
      * Confirms the universal preprocessing degradation law on U-Net++: Dual Enhanced drops -2.44% Dice and increases HD95 by +1.32 px compared to Raw Ultrasound (Baseline-09: 87.92% Dice, 13.25 px HD95 vs Baseline-10: 85.48% Dice, 14.57 px HD95).
      * Maintains robust boundary localization on BUS_BRA (11.89 px HD95) and prevents extreme domain collapse on BUS_UCLM (21.06 px HD95 vs 42.60 px on un-nested SMP U-Net Raw).
 
+42. Baseline-11: SMP U-Net++ (Nested U-Net) with ResNet-34 Backbone on CLAHE Alone (Zhou et al., 2018; segmentation_models_pytorch; trained from scratch; clahe_image; CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8645 Dice (86.45%), 0.7887 Jaccard (78.87%), 15.86 px HD95, 5.46 px ASD, 0.2182 Loss. Best Checkpoint: checkpoint-15500. Parameters: 26,072,337.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8916 (89.16%, 11.68 px HD95, 3.53 px ASD)
+     * BUSI = 0.7877 (78.77%, 27.59 px HD95, 11.16 px ASD)
+     * BUS_UCLM = 0.8557 (85.57%, 17.60 px HD95, 5.16 px ASD)
+   - Benchmark Analysis:
+     * Reaffirms intermediate position of CLAHE on U-Net++: Raw (Baseline-09: 87.92% Dice, 13.25 px HD95) > CLAHE Alone (Baseline-11: 86.45% Dice, 15.86 px HD95) > Dual Enhanced (Baseline-10: 85.48% Dice, 14.57 px HD95).
+     * CLAHE improves in-distribution BUS_BRA volume overlap to 89.16% compared to Dual Enhanced (87.91%), but suffers elevated boundary error on BUSI (27.59 px HD95).
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
