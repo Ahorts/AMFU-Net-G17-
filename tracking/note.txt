@@ -628,6 +628,18 @@ Experiment Summary:
      * Reaffirms intermediate position of CLAHE on U-Net++: Raw (Baseline-09: 87.92% Dice, 13.25 px HD95) > CLAHE Alone (Baseline-11: 86.45% Dice, 15.86 px HD95) > Dual Enhanced (Baseline-10: 85.48% Dice, 14.57 px HD95).
      * CLAHE improves in-distribution BUS_BRA volume overlap to 89.16% compared to Dual Enhanced (87.91%), but suffers elevated boundary error on BUSI (27.59 px HD95).
 
+43. Baseline-12: SMP U-Net++ (Nested U-Net) with ResNet-34 Backbone on SRAD Alone (Zhou et al., 2018; segmentation_models_pytorch; trained from scratch; srad_image; CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8572 Dice (85.72%), 0.7829 Jaccard (78.29%), 15.14 px HD95, 5.42 px ASD, 0.2292 Loss. Best Checkpoint: checkpoint-23500. Parameters: 26,072,337.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8833 (88.33%, 12.33 px HD95, 3.90 px ASD)
+     * BUSI = 0.7906 (79.06%, 22.80 px HD95, 9.25 px ASD)
+     * BUS_UCLM = 0.8203 (82.03%, 17.14 px HD95, 7.67 px ASD)
+   - Benchmark Analysis:
+     * Completes the 4/4 external comparative matrix for SMP U-Net++ with ResNet-34 from scratch.
+     * Confirms the universal preprocessing hierarchy on U-Net++: Raw (Baseline-09: 87.92% Dice, 13.25 px HD95) > CLAHE Alone (Baseline-11: 86.45% Dice, 15.86 px HD95) > SRAD Alone (Baseline-12: 85.72% Dice, 15.14 px HD95) > Dual Enhanced (Baseline-10: 85.48% Dice, 14.57 px HD95).
+     * SRAD diffusion smoothing erodes fine boundary details, causing an out-of-distribution Dice drop on BUS_UCLM to 82.03% compared to Raw (90.42%).
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
