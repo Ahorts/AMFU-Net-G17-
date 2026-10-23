@@ -652,6 +652,18 @@ Experiment Summary:
      * Focal Tversky Loss strictly dominates standard BCE + Dice across every single metric on the un-gated architecture: +0.29% Dice increase, -1.17 px reduction in 95% Hausdorff boundary error, and -0.35 px lower Average Surface Distance.
      * Demonstrates that the clinical asymmetry penalty (alpha=0.3 FP, beta=0.7 FN) and focal exponent (gamma=1.33) successfully sharpen boundary convergence even without attention gates.
 
+45. Exp-33: Plain U-Net Baseline on SRAD Alone with Focal Tversky Loss (alpha=0.3, beta=0.7, gamma=1.33, CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.7827 Dice (78.27%), 0.6906 Jaccard (69.06%), 33.01 px HD95, 10.44 px ASD, 0.3744 Loss. Best Checkpoint: checkpoint-17750. Parameters: 3,833,505.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8153 (81.53%, 27.28 px HD95, 7.97 px ASD)
+     * BUSI = 0.7148 (71.48%, 39.47 px HD95, 13.88 px ASD)
+     * BUS_UCLM = 0.6761 (67.61%, 73.69 px HD95, 25.44 px ASD)
+   - Benchmark Analysis:
+     * Direct comparison against Exp-32 (Plain U-Net on Raw with Focal Tversky: 81.31% Dice, 31.41 px HD95, 9.26 px ASD).
+     * SRAD preprocessing severely degrades Focal Tversky optimization by -3.04% Dice, -2.98% IoU, and +1.60 px higher boundary error.
+     * Catastrophic out-of-distribution collapse on BUS_UCLM: Dice plunges from 75.15% (Raw) to 67.61% (SRAD Alone), proving that non-linear anisotropic diffusion destroys the high-frequency speckle edges that loss functions rely upon for boundary discrimination.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
