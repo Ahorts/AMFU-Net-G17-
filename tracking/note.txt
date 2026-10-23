@@ -640,6 +640,18 @@ Experiment Summary:
      * Confirms the universal preprocessing hierarchy on U-Net++: Raw (Baseline-09: 87.92% Dice, 13.25 px HD95) > CLAHE Alone (Baseline-11: 86.45% Dice, 15.86 px HD95) > SRAD Alone (Baseline-12: 85.72% Dice, 15.14 px HD95) > Dual Enhanced (Baseline-10: 85.48% Dice, 14.57 px HD95).
      * SRAD diffusion smoothing erodes fine boundary details, causing an out-of-distribution Dice drop on BUS_UCLM to 82.03% compared to Raw (90.42%).
 
+44. Exp-32: Plain U-Net Baseline on Raw Ultrasound with Focal Tversky Loss (alpha=0.3, beta=0.7, gamma=1.33, CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8131 Dice (81.31%), 0.7204 Jaccard (72.04%), 31.41 px HD95, 9.26 px ASD, 0.3358 Loss. Best Checkpoint: checkpoint-27000. Parameters: 3,833,505.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8357 (83.57%, 25.51 px HD95, 7.23 px ASD)
+     * BUSI = 0.7626 (76.26%, 38.44 px HD95, 12.33 px ASD)
+     * BUS_UCLM = 0.7515 (75.15%, 71.90 px HD95, 20.62 px ASD)
+   - Benchmark Analysis:
+     * Direct ablation head-to-head against Exp-22 (Plain U-Net Baseline on Raw with standard BCE + Soft Dice: 81.02% Dice, 32.58 px HD95, 9.61 px ASD).
+     * Focal Tversky Loss strictly dominates standard BCE + Dice across every single metric on the un-gated architecture: +0.29% Dice increase, -1.17 px reduction in 95% Hausdorff boundary error, and -0.35 px lower Average Surface Distance.
+     * Demonstrates that the clinical asymmetry penalty (alpha=0.3 FP, beta=0.7 FN) and focal exponent (gamma=1.33) successfully sharpen boundary convergence even without attention gates.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
