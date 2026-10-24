@@ -700,6 +700,18 @@ Experiment Summary:
      * Direct comparison against Exp-26 (Plain U-Net on Dual Enhanced with BCE+Dice: 79.08% Dice, 38.93 px HD95): Focal Tversky achieves +0.57% Dice increase and cuts boundary error by -4.34 px.
      * Crucial Attention Gating Finding: Comparing Exp-35 (U-Net + DAG on Enhanced: 83.03% Dice, 26.02 px HD95) against Exp-36 (Plain U-Net on Enhanced: 79.65% Dice, 34.59 px HD95) demonstrates that DAG attention gates recover +3.38% Dice and -8.57 px boundary sharpness on enhanced images, rescuing BUS_UCLM from catastrophic collapse (69.23% -> 87.78%, a +18.55% recovery).
 
+49. Exp-37: U-Net + DAG on SRAD Alone with Focal Tversky Loss (alpha=0.3, beta=0.7, gamma=1.33, CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8350 Dice (83.50%), 0.7456 Jaccard (74.56%), 21.91 px HD95, 6.69 px ASD, 0.3566 Loss. Step: 35,200. Parameters: 6,185,505.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8536 (85.36%, 18.35 px HD95, 5.23 px ASD)
+     * BUSI = 0.7822 (78.22%, 30.07 px HD95, 10.63 px ASD)
+     * BUS_UCLM = 0.8292 (82.92%, 30.69 px HD95, 7.91 px ASD)
+   - Benchmark Analysis:
+     * Direct comparison against Exp-24 (U-Net + DAG on SRAD Alone with BCE+Dice: 82.86% Dice, 73.89% IoU, 22.77 px HD95, 6.95 px ASD): Focal Tversky achieves +0.64% absolute Dice increase, +0.67% IoU, and reduces 95HD by -0.86 px.
+     * Architectural Attention Gating Lift on SRAD: Comparing Exp-37 (U-Net + DAG on SRAD: 83.50% Dice) vs Exp-33 (Plain U-Net on SRAD: 78.27% Dice) shows a massive +5.23% Dice and -11.10 px HD95 improvement from DAG gating. DAG rescues out-of-distribution BUS_UCLM from 67.61% to 82.92% (+15.31% Dice recovery).
+     * Filter Stacking Penalty Reconfirmed: U-Net + DAG on SRAD Alone (Exp-37: 83.50% Dice, 21.91 px HD95) beats U-Net + DAG on Dual Enhanced [SRAD+CLAHE] (Exp-35: 83.03% Dice, 26.02 px HD95) by +0.47% Dice and -4.11 px HD95, confirming that compounding anisotropic diffusion with CLAHE introduces artificial edge transitions that harm boundary localization.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
