@@ -688,6 +688,18 @@ Experiment Summary:
      * Focal Tversky Loss delivers consistent gains over standard BCE+Dice on the dual-enhanced modality: +0.27% Dice lift, +0.05% IoU, and -0.73 px reduction in 95% Hausdorff distance.
      * Exceptional out-of-distribution generalization on BUS_UCLM: Dice surges to 87.78% (vs 84.57% in Exp-25), demonstrating that the asymmetric penalization (beta=0.7 FN) combined with DAG attention gates robustly suppresses contrast-amplified acoustic artifacts on multi-center scanners.
 
+48. Exp-36: Plain U-Net Baseline on Dual Enhanced [SRAD + CLAHE] with Focal Tversky Loss (alpha=0.3, beta=0.7, gamma=1.33, CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.7965 Dice (79.65%), 0.6976 Jaccard (69.76%), 34.59 px HD95, 10.72 px ASD, 0.4368 Loss. Step: 35,200. Parameters: 3,831,489.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8178 (81.78%, 31.48 px HD95, 9.60 px ASD)
+     * BUSI = 0.7607 (76.07%, 35.21 px HD95, 11.22 px ASD)
+     * BUS_UCLM = 0.6923 (69.23%, 68.18 px HD95, 21.75 px ASD)
+   - Benchmark Analysis & Full 4-Modality Plain U-Net Grid Completion under Focal Tversky:
+     * Complete 4-Modality Hierarchy on Plain U-Net (Focal Tversky): CLAHE Alone (Exp-34: 81.74%) > Raw (Exp-32: 81.31%) > Dual Enhanced (Exp-36: 79.65%) > SRAD Alone (Exp-33: 78.27%).
+     * Direct comparison against Exp-26 (Plain U-Net on Dual Enhanced with BCE+Dice: 79.08% Dice, 38.93 px HD95): Focal Tversky achieves +0.57% Dice increase and cuts boundary error by -4.34 px.
+     * Crucial Attention Gating Finding: Comparing Exp-35 (U-Net + DAG on Enhanced: 83.03% Dice, 26.02 px HD95) against Exp-36 (Plain U-Net on Enhanced: 79.65% Dice, 34.59 px HD95) demonstrates that DAG attention gates recover +3.38% Dice and -8.57 px boundary sharpness on enhanced images, rescuing BUS_UCLM from catastrophic collapse (69.23% -> 87.78%, a +18.55% recovery).
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
