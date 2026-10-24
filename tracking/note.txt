@@ -664,6 +664,18 @@ Experiment Summary:
      * SRAD preprocessing severely degrades Focal Tversky optimization by -3.04% Dice, -2.98% IoU, and +1.60 px higher boundary error.
      * Catastrophic out-of-distribution collapse on BUS_UCLM: Dice plunges from 75.15% (Raw) to 67.61% (SRAD Alone), proving that non-linear anisotropic diffusion destroys the high-frequency speckle edges that loss functions rely upon for boundary discrimination.
 
+46. Exp-34: Plain U-Net Baseline on CLAHE Alone with Focal Tversky Loss (alpha=0.3, beta=0.7, gamma=1.33, CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8174 Dice (81.74%), 0.7254 Jaccard (72.54%), 33.95 px HD95, 9.87 px ASD, 0.3319 Loss. Step: 35,200. Parameters: 3,831,489.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8435 (84.35%, 26.30 px HD95, 7.53 px ASD)
+     * BUSI = 0.7589 (75.89%, 48.40 px HD95, 13.90 px ASD)
+     * BUS_UCLM = 0.7491 (74.91%, 64.97 px HD95, 21.07 px ASD)
+   - Benchmark Analysis:
+     * Direct comparison against Exp-32 (Raw + Focal Tversky: 81.31% Dice, 31.41 px HD95) and Exp-33 (SRAD + Focal Tversky: 78.27% Dice, 33.01 px HD95).
+     * Modality ranking under Focal Tversky without attention gates mirrors the standard loss hierarchy on un-gated backbones: CLAHE Alone (81.74%) > Raw (81.31%) > SRAD Alone (78.27%).
+     * While CLAHE provides +0.43% Dice over Raw on Plain U-Net, boundary sharpness remains slightly worse (33.95 px vs 31.41 px HD95), confirming that contrast enhancement boosts region overlap while slightly diluting boundary localization precision compared to native backscatter.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
