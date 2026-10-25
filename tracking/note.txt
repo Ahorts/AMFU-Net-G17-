@@ -712,6 +712,19 @@ Experiment Summary:
      * Architectural Attention Gating Lift on SRAD: Comparing Exp-37 (U-Net + DAG on SRAD: 83.50% Dice) vs Exp-33 (Plain U-Net on SRAD: 78.27% Dice) shows a massive +5.23% Dice and -11.10 px HD95 improvement from DAG gating. DAG rescues out-of-distribution BUS_UCLM from 67.61% to 82.92% (+15.31% Dice recovery).
      * Filter Stacking Penalty Reconfirmed: U-Net + DAG on SRAD Alone (Exp-37: 83.50% Dice, 21.91 px HD95) beats U-Net + DAG on Dual Enhanced [SRAD+CLAHE] (Exp-35: 83.03% Dice, 26.02 px HD95) by +0.47% Dice and -4.11 px HD95, confirming that compounding anisotropic diffusion with CLAHE introduces artificial edge transitions that harm boundary localization.
 
+50. Exp-38: U-Net + DAG on CLAHE Alone with Focal Tversky Loss (alpha=0.3, beta=0.7, gamma=1.33, CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8494 Dice (84.94%), 0.7655 Jaccard (76.55%), 21.84 px HD95, 6.74 px ASD, 0.3422 Loss. Step: 35,200. Parameters: 6,185,505.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8660 (86.60%, 17.49 px HD95, 5.26 px ASD)
+     * BUSI = 0.7943 (79.43%, 33.10 px HD95, 11.12 px ASD)
+     * BUS_UCLM = 0.8766 (87.66%, 27.34 px HD95, 6.55 px ASD)
+   - Benchmark Analysis:
+     * Direct comparison against Exp-17 (U-Net + DAG on CLAHE Alone with BCE+Dice: 84.15% Dice, 75.64% IoU, 23.62 px HD95, 7.18 px ASD): Focal Tversky Loss delivers +0.79% absolute Dice increase, +0.91% IoU, and reduces 95HD by -1.78 px.
+     * Architectural Attention Gating Lift on CLAHE: Comparing Exp-38 (U-Net + DAG on CLAHE: 84.94% Dice) against Exp-34 (Plain U-Net on CLAHE: 81.74% Dice) yields a +3.20% absolute Dice improvement, +4.01% IoU, and slashes boundary error by -12.11 px (-35.7%).
+     * Multi-Center Hospital Robustness: On external cohort BUS_UCLM, boundary error plunges from 64.97 px (Plain U-Net) to 27.34 px (DAG), a massive -37.63 px reduction.
+     * All-Time Ranking Context: At 84.94% Dice and 76.55% IoU, Exp-38 surpasses the champion Exp-16 in region overlap (76.55% vs 76.37% IoU) and sits within 0.25% Dice of Exp-16 (85.19%), setting the stage for U-Net + DAG on Raw with Focal Tversky.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
