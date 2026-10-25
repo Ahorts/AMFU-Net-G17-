@@ -814,6 +814,22 @@ Experiment Summary:
      * DAG Superiority over MFEF: U-Net + DAG beats U-Net + MFEF by +1.24% absolute Dice while using 62.9% fewer parameters (6.19M vs 16.68M).
      * Out-of-Distribution Degradation Without Attention Gates: On external scanner cohort BUS_UCLM, boundary error without DAG attention gates explodes to 49.43 px HD95 (U-Net + MFEF), whereas DAG attention gates (U-Net + DAG) suppress background noise and slash HD95 to 30.69 px (-18.74 px reduction).
 
+57. Exp-45: U-Net + MFEF on CLAHE Alone with Focal Tversky Loss (alpha=0.3, beta=0.7, gamma=1.33, CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8391 Dice (83.91%), 0.7561 Jaccard (75.61%), 20.84 px HD95, 7.10 px ASD, 0.3586 Loss. Step: 35,200. Parameters: 16,679,393.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8681 (86.81%, 15.70 px HD95, 4.95 px ASD)
+     * BUSI = 0.7684 (76.84%, 31.61 px HD95, 11.97 px ASD)
+     * BUS_UCLM = 0.7833 (78.33%, 37.48 px HD95, 12.64 px ASD)
+   - Benchmark Analysis & Complete CLAHE Alone 4-Architecture Grid under Focal Tversky:
+     * Architecture Comparison on CLAHE Alone (Focal Tversky):
+       1. U-Net + DAG (Exp-38, 6.19M): 84.94% Dice, 76.55% IoU, 21.84 px HD95, 0.3422 Loss
+       2. U-Net + MFEF (Exp-45, 16.68M): 83.91% Dice, 75.61% IoU, 20.84 px HD95, 0.3586 Loss
+       3. Full AMFU-Net (Exp-41, 19.03M): 83.27% Dice, 74.49% IoU, 24.85 px HD95, 0.3735 Loss
+       4. Plain U-Net (Exp-34, 3.83M): 81.74% Dice, 72.54% IoU, 33.95 px HD95, 0.3319 Loss
+     * DAG Superiority over MFEF on CLAHE: U-Net + DAG beats U-Net + MFEF by +1.03% absolute Dice and +0.94% IoU while requiring 62.9% fewer parameters (6.19M vs 16.68M).
+     * Out-of-Distribution Vulnerability: MFEF specializes heavily on the primary training scanner cohort BUS_BRA (86.81% Dice, 15.70 px HD95), but without DAG attention gates, external hospital cohort BUS_UCLM collapses from 87.66% (U-Net + DAG) to 78.33% (-9.33% Dice collapse, +10.14 px boundary error penalty). Attention gating remains essential for multi-site ultrasound generalization.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
