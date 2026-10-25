@@ -766,6 +766,21 @@ Experiment Summary:
      * Direct comparison against Exp-18 (Full AMFU-Net on CLAHE Alone with BCE+Dice: 82.48% Dice, 73.47% IoU, 25.02 px HD95, 7.58 px ASD): Focal Tversky delivers +0.79% absolute Dice increase, +1.02% IoU, and -0.17 px HD95 reduction.
      * Universal Module Hierarchy: Across both isolated single preprocessing modalities (SRAD and CLAHE), U-Net + DAG strictly outperforms Full AMFU-Net (+1.38% on SRAD, +1.67% on CLAHE), proving that dilated multi-scale pooling at the bottleneck dilutes spatial resolution without aiding boundary localization.
 
+54. Exp-42: Full AMFU-Net on Dual Enhanced [SRAD + CLAHE] with Focal Tversky Loss (alpha=0.3, beta=0.7, gamma=1.33, CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8161 Dice (81.61%), 0.7214 Jaccard (72.14%), 31.50 px HD95, 9.43 px ASD, 0.3888 Loss. Step: 35,200. Parameters: 19,033,409.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8262 (82.62%, 29.64 px HD95, 8.55 px ASD)
+     * BUSI = 0.7797 (77.97%, 36.10 px HD95, 11.95 px ASD)
+     * BUS_UCLM = 0.8438 (84.38%, 34.66 px HD95, 9.62 px ASD)
+   - Benchmark Analysis:
+     * Direct comparison against Exp-35 (U-Net + DAG on Dual Enhanced with Focal Tversky: 83.03% Dice, 73.82% IoU, 26.02 px HD95, 7.91 px ASD, 6.19M params): Adding MFEF degrades Dice by -1.42%, drops IoU by -1.68%, and worsens 95HD by +5.48 px.
+     * Direct comparison against Exp-21 (Full AMFU-Net on Dual Enhanced with BCE+Dice: 81.51% Dice, 71.77% IoU, 28.93 px HD95, 8.53 px ASD): Modest +0.10% Dice lift and +0.37% IoU under Focal Tversky.
+     * Definitive 3-Way Architectural Hierarchy on Dual Enhanced (Focal Tversky):
+       1. U-Net + DAG (Exp-35, 6.19M): 83.03% Dice, 73.82% IoU, 26.02 px HD95, 0.3597 Loss
+       2. Full AMFU-Net (Exp-42, 19.03M): 81.61% Dice, 72.14% IoU, 31.50 px HD95, 0.3888 Loss
+       3. Plain U-Net (Exp-36, 3.83M): 79.65% Dice, 69.76% IoU, 34.59 px HD95, 0.4368 Loss
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
