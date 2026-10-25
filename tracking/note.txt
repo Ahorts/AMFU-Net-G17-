@@ -742,6 +742,18 @@ Experiment Summary:
        3. SRAD Alone (Exp-37): 83.50% Dice, 74.56% IoU, 21.91 px HD95, 0.3566 Loss
        4. Dual Enhanced (Exp-35): 83.03% Dice, 73.82% IoU, 26.02 px HD95, 0.3597 Loss
 
+52. Exp-40: Full AMFU-Net on SRAD Alone with Focal Tversky Loss (alpha=0.3, beta=0.7, gamma=1.33, CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8212 Dice (82.12%), 0.7272 Jaccard (72.72%), 26.28 px HD95, 7.76 px ASD, 0.3797 Loss. Step: 35,200. Parameters: 19,033,409.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8420 (84.20%, 23.74 px HD95, 6.43 px ASD)
+     * BUSI = 0.7537 (75.37%, 34.21 px HD95, 11.97 px ASD)
+     * BUS_UCLM = 0.8505 (85.05%, 24.13 px HD95, 6.32 px ASD)
+   - Benchmark Analysis & The Invariant Detriment of MFEF Bottleneck:
+     * Direct comparison against Exp-37 (U-Net + DAG on SRAD Alone with Focal Tversky: 83.50% Dice, 74.56% IoU, 21.91 px HD95, 6.69 px ASD, 6.19M params): Adding the multi-scale MFEF module (+12.85M parameters, 3.1x larger model) degrades Dice by -1.38%, drops IoU by -1.84%, and increases boundary error by +4.37 px HD95.
+     * Direct comparison against Exp-20 (Full AMFU-Net on SRAD Alone with BCE+Dice: 82.12% Dice, 72.61% IoU, 28.87 px HD95, 8.58 px ASD): Focal Tversky yields identical global Dice (82.12%) while sharpening boundary error by -2.59 px HD95.
+     * Architectural Theorem: Across all loss functions (BCE+Dice and Focal Tversky) and schedulers (StepLR and Cosine), the MFEF multi-scale bottleneck consistently degrades segmentation accuracy and parameter efficiency on 2D single-modality ultrasound.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
