@@ -781,6 +781,23 @@ Experiment Summary:
        2. Full AMFU-Net (Exp-42, 19.03M): 81.61% Dice, 72.14% IoU, 31.50 px HD95, 0.3888 Loss
        3. Plain U-Net (Exp-36, 3.83M): 79.65% Dice, 69.76% IoU, 34.59 px HD95, 0.4368 Loss
 
+55. Exp-43: Full AMFU-Net on Raw Ultrasound with Focal Tversky Loss (alpha=0.3, beta=0.7, gamma=1.33, CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8397 Dice (83.97%), 0.7520 Jaccard (75.20%), 24.73 px HD95, 7.46 px ASD, 0.3439 Loss. Step: 35,200. Parameters: 19,033,409.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8598 (85.98%, 21.08 px HD95, 6.09 px ASD)
+     * BUSI = 0.7738 (77.38%, 35.25 px HD95, 11.68 px ASD)
+     * BUS_UCLM = 0.8706 (87.06%, 25.08 px HD95, 6.56 px ASD)
+   - Benchmark Analysis & The 12-Experiment Focal Tversky Matrix Conclusion:
+     * Direct comparison against Exp-39 (U-Net + DAG on Raw with Focal Tversky: 84.70% Dice, 75.87% IoU, 21.68 px HD95, 6.53 px ASD, 6.19M params): Adding the MFEF multi-scale bottleneck on Raw drops Dice by -0.73%, drops IoU by -0.67%, and inflates boundary error by +3.05 px HD95 despite a 3.1x larger parameter footprint.
+     * Direct comparison against Exp-19 (Full AMFU-Net on Raw with BCE+Dice: 83.58% Dice, 74.76% IoU, 25.38 px HD95, 7.36 px ASD): Focal Tversky achieves +0.39% absolute Dice lift, +0.44% IoU, and -0.65 px HD95 reduction.
+     * Definitive 4-Modality Hierarchy on Full AMFU-Net (Focal Tversky):
+       1. Raw Ultrasound (Exp-43): 83.97% Dice, 75.20% IoU, 24.73 px HD95, 0.3439 Loss
+       2. CLAHE Alone (Exp-41): 83.27% Dice, 74.49% IoU, 24.85 px HD95, 0.3735 Loss
+       3. SRAD Alone (Exp-40): 82.12% Dice, 72.72% IoU, 26.28 px HD95, 0.3797 Loss
+       4. Dual Enhanced (Exp-42): 81.61% Dice, 72.14% IoU, 31.50 px HD95, 0.3888 Loss
+     * The Classical Preprocessing Degradation Law Holds Universally: Across all evaluated architectures (Plain U-Net, U-Net + DAG, Full AMFU-Net) and across both loss functions (BCE+Dice and Focal Tversky), stacking filtering operations degrades performance below isolated or raw baseline scans.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
