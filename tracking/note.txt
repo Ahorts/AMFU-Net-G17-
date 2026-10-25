@@ -830,6 +830,21 @@ Experiment Summary:
      * DAG Superiority over MFEF on CLAHE: U-Net + DAG beats U-Net + MFEF by +1.03% absolute Dice and +0.94% IoU while requiring 62.9% fewer parameters (6.19M vs 16.68M).
      * Out-of-Distribution Vulnerability: MFEF specializes heavily on the primary training scanner cohort BUS_BRA (86.81% Dice, 15.70 px HD95), but without DAG attention gates, external hospital cohort BUS_UCLM collapses from 87.66% (U-Net + DAG) to 78.33% (-9.33% Dice collapse, +10.14 px boundary error penalty). Attention gating remains essential for multi-site ultrasound generalization.
 
+58. Exp-46: U-Net + MFEF on Dual Enhanced [SRAD + CLAHE] with Focal Tversky Loss (alpha=0.3, beta=0.7, gamma=1.33, CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8287 Dice (82.87%), 0.7407 Jaccard (74.07%), 25.97 px HD95, 8.11 px ASD, 0.3726 Loss. Step: 35,200. Parameters: 16,679,393.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8525 (85.25%, 22.18 px HD95, 6.70 px ASD)
+     * BUSI = 0.7759 (77.59%, 30.77 px HD95, 10.66 px ASD)
+     * BUS_UCLM = 0.7628 (76.28%, 50.90 px HD95, 14.30 px ASD)
+   - Benchmark Analysis & Complete Dual Enhanced 4-Architecture Grid under Focal Tversky:
+     * Architecture Comparison on Dual Enhanced (Focal Tversky):
+       1. U-Net + DAG (Exp-35, 6.19M): 83.03% Dice, 73.82% IoU, 26.02 px HD95, 0.3597 Loss
+       2. U-Net + MFEF (Exp-46, 16.68M): 82.87% Dice, 74.07% IoU, 25.97 px HD95, 0.3726 Loss
+       3. Full AMFU-Net (Exp-42, 19.03M): 81.61% Dice, 72.14% IoU, 31.50 px HD95, 0.3888 Loss
+       4. Plain U-Net (Exp-36, 3.83M): 79.65% Dice, 69.76% IoU, 34.59 px HD95, 0.4368 Loss
+     * Cross-Scanner Boundary Failure Without Attention Gating: On external test cohort BUS_UCLM, omitting DAG attention gates causes 95HD to explode from 23.52 px (U-Net + DAG) to 50.90 px (U-Net + MFEF), more than doubling the boundary localization error (+27.38 px penalty).
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
