@@ -725,6 +725,23 @@ Experiment Summary:
      * Multi-Center Hospital Robustness: On external cohort BUS_UCLM, boundary error plunges from 64.97 px (Plain U-Net) to 27.34 px (DAG), a massive -37.63 px reduction.
      * All-Time Ranking Context: At 84.94% Dice and 76.55% IoU, Exp-38 surpasses the champion Exp-16 in region overlap (76.55% vs 76.37% IoU) and sits within 0.25% Dice of Exp-16 (85.19%), setting the stage for U-Net + DAG on Raw with Focal Tversky.
 
+51. Exp-39: U-Net + DAG on Raw Ultrasound with Focal Tversky Loss (alpha=0.3, beta=0.7, gamma=1.33, CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8470 Dice (84.70%), 0.7587 Jaccard (75.87%), 21.68 px HD95, 6.53 px ASD, 0.3296 Loss. Step: 35,200. Parameters: 6,185,505.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8666 (86.66%, 17.47 px HD95, 5.00 px ASD)
+     * BUSI = 0.7939 (79.39%, 33.01 px HD95, 10.91 px ASD)
+     * BUS_UCLM = 0.8317 (83.17%, 25.28 px HD95, 6.78 px ASD)
+   - Benchmark Analysis & Completion of the 8-Experiment Focal Tversky Battery:
+     * Surface Error Champion: Achieves the lowest 95% Hausdorff Distance (21.68 px) and lowest Average Surface Distance (6.53 px) across all 8 Focal Tversky experiments, as well as the lowest test loss (0.3296).
+     * Architectural Attention Gating Lift on Raw: Comparing Exp-39 (U-Net + DAG on Raw: 84.70% Dice, 21.68 px HD95) vs Exp-32 (Plain U-Net on Raw: 81.31% Dice, 31.41 px HD95) demonstrates +3.39% absolute Dice increase, +3.83% IoU, and cuts boundary error by -9.73 px (-31.0%).
+     * Loss Function Dynamics on Raw Ultrasound: While Focal Tversky boosts CLAHE (+0.79% Dice), SRAD (+0.64% Dice), and Dual Enhanced (+0.27% Dice), symmetric soft Dice retains a slight advantage on Raw Ultrasound with attention gates (Exp-16: 85.19% Dice, 20.72 px HD95 vs Exp-39: 84.70% Dice, 21.68 px HD95). The heavy false negative penalty (beta=0.7) induces slight margin conservative expansion on raw acoustic speckle backscatter, whereas soft Dice matches raw boundary gradients symmetrically.
+     * Definitive 4-Modality U-Net + DAG Hierarchy under Focal Tversky:
+       1. CLAHE Alone (Exp-38): 84.94% Dice, 76.55% IoU, 21.84 px HD95, 0.3422 Loss
+       2. Raw Ultrasound (Exp-39): 84.70% Dice, 75.87% IoU, 21.68 px HD95, 0.3296 Loss
+       3. SRAD Alone (Exp-37): 83.50% Dice, 74.56% IoU, 21.91 px HD95, 0.3566 Loss
+       4. Dual Enhanced (Exp-35): 83.03% Dice, 73.82% IoU, 26.02 px HD95, 0.3597 Loss
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
