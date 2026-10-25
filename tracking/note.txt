@@ -845,6 +845,22 @@ Experiment Summary:
        4. Plain U-Net (Exp-36, 3.83M): 79.65% Dice, 69.76% IoU, 34.59 px HD95, 0.4368 Loss
      * Cross-Scanner Boundary Failure Without Attention Gating: On external test cohort BUS_UCLM, omitting DAG attention gates causes 95HD to explode from 23.52 px (U-Net + DAG) to 50.90 px (U-Net + MFEF), more than doubling the boundary localization error (+27.38 px penalty).
 
+59. Exp-47: U-Net + MFEF on Raw Ultrasound with Focal Tversky Loss (alpha=0.3, beta=0.7, gamma=1.33, CosineAnnealingLR eta_min=1e-5, 200 epochs):
+   - Scope: Evaluated on handheld B-mode ultrasound benchmark (Ahorts/G17-preprocessed-dataset, 266 immutable test scans).
+   - Metrics: 0.8461 Dice (84.61%), 0.7639 Jaccard (76.39%), 21.70 px HD95, 6.38 px ASD, 0.3410 Loss. Step: 35,200. Parameters: 16,679,393.
+   - Cohort Breakdown:
+     * BUS_BRA = 0.8654 (86.54%, 16.86 px HD95, 4.80 px ASD)
+     * BUSI = 0.7916 (79.16%, 28.07 px HD95, 9.38 px ASD)
+     * BUS_UCLM = 0.8401 (84.01%, 52.42 px HD95, 12.85 px ASD)
+   - Benchmark Analysis & Completion of the Entire 16/16 Focal Tversky Factorial Matrix:
+     * Architecture Comparison on Raw Ultrasound (Focal Tversky):
+       1. U-Net + DAG (Exp-39, 6.19M): 84.70% Dice, 75.87% IoU, 21.68 px HD95, 0.3296 Loss (Champion efficiency)
+       2. U-Net + MFEF (Exp-47, 16.68M): 84.61% Dice, 76.39% IoU, 21.70 px HD95, 0.3410 Loss
+       3. Full AMFU-Net (Exp-43, 19.03M): 83.97% Dice, 75.20% IoU, 24.73 px HD95, 0.3439 Loss
+       4. Plain U-Net (Exp-32, 3.83M): 81.31% Dice, 72.04% IoU, 31.41 px HD95, 0.3326 Loss
+     * Out-of-Distribution Error Explosion Without Attention Gates: While U-Net + MFEF achieves strong in-distribution overlap (BUS_BRA 86.54%), the lack of DAG attention gates causes 95HD on external hospital cohort BUS_UCLM to explode to 52.42 px (vs 25.28 px with DAG, a +27.14 px boundary error penalty).
+     * Complete 16-Run Factorial Matrix Closure: Every permutation of the 4 architectures (Plain U-Net, U-Net + DAG, U-Net + MFEF, Full AMFU-Net) across all 4 preprocessing modalities (Raw, CLAHE Alone, SRAD Alone, Dual Enhanced) has now been rigorously trained and evaluated under modern Cosine Annealing with Focal Tversky Loss.
+
 Core Findings:
 1. Preprocessing Hierarchy & Interaction:
    - CLAHE Alone (80.03%–83.68% Dice) > SRAD + CLAHE (78.23%–81.20% Dice) > SRAD Alone (81.10% Dice) > Raw Ultrasound (77.93%–80.52% Dice).
