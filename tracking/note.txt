@@ -1009,3 +1009,36 @@ Clinical Synthesis & Trade-off:
 
 Hugging Face Release:
 - Published to `Ahorts/G17-AMFU-Net-Paper` on branch `exp34-unet-dag-boundary-enhanced-cosine-only`.
+
+
+Session 10 - Exp-35: Raw Ultrasound with MFEF Bottleneck & Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Evaluate the combination of multi-scale bottleneck feature extraction (MFEF: 1x1, 3x3, 5x5, dilated 3x3 convolutions with global context projection) with explicit boundary loss on raw native ultrasound to assess boundary delineation and multi-center generalization.
+
+Methodology:
+1. Architecture: U-Net + MFEF Bottleneck (DAG=False, MFEF=True, base_channels=32, params=43.78M).
+2. Input Modality: Raw Ultrasound (raw_image, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 84.93% (vs. Exp-31 MFEF baseline 84.65%, +0.28%)
+- Test Jaccard (IoU): 76.36% (vs. Exp-31 76.52%, -0.16%)
+- 95% Hausdorff Distance (95HD): 18.88 px (vs. Exp-31 18.75 px, +0.13 px)
+- Average Surface Distance (ASD): 5.68 px (vs. Exp-31 6.27 px, -0.59 px / -9.4% surface error reduction)
+
+Per-Dataset Breakdown:
+- BUS-BRA: Dice 87.55%, IoU 79.27%, 95HD 13.44 px, ASD 3.98 px
+- BUSI: Dice 79.27%, IoU 70.66%, 95HD 27.09 px, ASD 8.11 px
+- BUS-UCLM: Dice 77.13%, IoU 65.34%, 95HD 49.31 px, ASD 15.67 px
+
+Architectural Findings:
+- MFEF multi-scale convolutions combined with boundary loss yielded consistent margin tightening on BUS-BRA (13.44 px 95HD) and BUSI (27.09 px 95HD).
+- On BUS-UCLM, performance dropped relative to DAG-gated architectures (77.13% vs 84.16% in Exp-33), indicating that without DAG attention gates filtering skip connections, multi-scale features alone are more susceptible to boundary leakage in low-contrast acoustic transitions.
+
+Hugging Face Release:
+- Published to Ahorts/G17-AMFU-Net-Paper on branch exp35-unet-mfef-boundary-raw-cosine-only.
