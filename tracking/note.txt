@@ -1081,3 +1081,38 @@ Comparative & Architectural Findings:
 
 Hugging Face Release:
 - Published to Ahorts/G17-AMFU-Net-Paper on branch exp36-unet-dag-boundary-srad-cosine-only.
+
+
+Session 12 - Exp-37: CLAHE Alone with MFEF Bottleneck & Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Evaluate the impact of explicit boundary supervision (Active Contour Morphological Gradient) on CLAHE contrast-enhanced ultrasound when utilizing multi-scale bottleneck feature extraction (MFEF) without DAG skip attention gating.
+
+Methodology:
+1. Architecture: U-Net + MFEF Bottleneck (DAG=False, MFEF=True, base_channels=32, params=16.68M).
+2. Input Modality: CLAHE Alone (clahe_image, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 83.85% (vs. Exp-45 CLAHE MFEF baseline 83.91%, -0.06%)
+- Test Jaccard (IoU): 75.76% (vs. Exp-45 75.61%, +0.15%)
+- 95% Hausdorff Distance (95HD): 20.64 px (vs. Exp-45 20.84 px, -0.20 px boundary error reduction)
+- Average Surface Distance (ASD): 6.43 px (vs. Exp-45 7.10 px, -0.67 px / -9.4% surface error reduction)
+- Test Loss: 0.6576
+
+Per-Dataset Breakdown:
+- BUS-BRA: Dice 86.24%, IoU 78.37%, 95HD 16.92 px, ASD 5.04 px
+- BUSI: Dice 78.74%, IoU 70.52%, 95HD 27.12 px, ASD 8.94 px
+- BUS-UCLM: Dice 76.60%, IoU 66.38%, 95HD 37.90 px, ASD 12.61 px
+
+Comparative & Architectural Findings:
+- Surface distance metric ASD showed consistent reduction (-0.67 px / -9.4%), mirroring trends observed across prior boundary loss experiments.
+- On BUSI, boundary supervision produced notable localization gains, raising Dice from 76.84% to 78.74% (+1.90%) and slashing 95HD from 31.61 px to 27.12 px (-4.49 px).
+- Similar to Exp-35 (Raw + MFEF), BUS-UCLM underperformed relative to DAG-gated architectures (76.60% vs 84.47% in Exp-32), confirming that multi-scale bottleneck expansions require skip attention gates to suppress out-of-distribution boundary dispersion in low-contrast acoustic transitions.
+
+Hugging Face Release:
+- Published to Ahorts/G17-AMFU-Net-Paper on branch exp37-unet-mfef-boundary-clahe-cosine-only.
