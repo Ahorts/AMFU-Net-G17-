@@ -909,3 +909,67 @@ We are not claiming to fully reproduce the original AMFU-Net paper, because the 
 
 Simple one-line summary:
 Because the original fused ultrasound dataset is private, our project adapts AMFU-Net by replacing fusion with SRAD + CLAHE preprocessing on public breast ultrasound images, then trains the AMFU-Net segmentation model on the enhanced images and their lesion masks.
+
+
+Session 7 - Boundary Loss Implementation & Benchmark (Exp-32)
+
+Problem Statement & Supervisor Feedback:
+During the monthly presentation, the supervisor highlighted the boundary sharpness trade-off: while preprocessed/enhanced modalities provided high clinical recall, edge delineations remained softened. To address this without discarding recall, we formulated and trained AMFU-Net with explicit boundary supervision.
+
+Methodology:
+1. Loss Formulation: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Regional Component: Focal Tversky (alpha=0.3, beta=0.7, gamma=1.33) anchors clinical sensitivity.
+   - Boundary Component: Differentiable morphological active contour extraction on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+     directly penalizing spatial contour misalignment and boundary distance.
+2. Architecture & Training:
+   - AMFU-Net (DAG=True, MFEF=False, base_channels=32, params=31.05M).
+   - Input Modality: CLAHE alone (256x256).
+   - Optimizer & Scheduler: Adam (lr=1e-3, wd=1e-5) with CosineAnnealingLR (min_lr=1e-5, 200 epochs).
+   - Training Environment: Molab GPU instance with Marimo interactive runtime.
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 84.47% (vs. Paper Baseline 79.09%, +5.38% gain)
+- Test Jaccard (IoU): 75.92% (vs. Paper Baseline 69.67%, +6.25% gain)
+- 95% Hausdorff Distance (95HD): 19.04 px (vs. Paper Baseline 30.10 px, -11.06 px / -36.7% boundary error reduction)
+- Average Surface Distance (ASD): 5.74 px (vs. Paper Baseline 9.89 px, -4.15 px / -42.0% surface error reduction)
+
+Per-Dataset Breakdown:
+- BUS-BRA: Dice 86.80%, IoU 78.37%, 95HD 14.39 px, ASD 4.22 px
+- BUS-UCLM: Dice 87.44%, IoU 78.64%, 95HD 21.19 px, ASD 4.42 px
+- BUSI: Dice 76.95%, IoU 68.14%, 95HD 32.02 px, ASD 10.49 px
+
+Deployment & Artifacts:
+- Checkpoint: Saved step 26,750 (Val Dice 82.60%).
+- Hugging Face Model Branch: Published to `Ahorts/G17-AMFU-Net-Paper` on branch `exp32-unet-dag-boundary-clahe-cosine-only`.
+- App Integration: Added Exp-32 as top-priority champion checkpoint in `G17-Model/app.py`.
+
+
+Session 8 - Exp-33: Raw Ultrasound with Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Evaluate whether applying explicit boundary supervision (Active Contour Morphological Gradient) to unfiltered native ultrasound (Raw modality) improves boundary contour delineation and beats the 85.19% Dice / 20.72 px 95HD baseline of Exp-16.
+
+Methodology:
+1. Architecture: AMFU-Net (DAG=True, MFEF=False, base_channels=32, params=31.05M).
+2. Input Modality: Raw Ultrasound (`raw_image`, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 84.96% (vs. Exp-16 Raw baseline 85.19%)
+- Test Jaccard (IoU): 76.23% (vs. Exp-16 76.37%)
+- 95% Hausdorff Distance (95HD): 20.20 px (vs. Exp-16 20.72 px, -0.52 px improvement)
+- Average Surface Distance (ASD): 5.62 px (vs. Exp-16 6.27 px, -0.65 px / -10.4% error reduction) -> New all-time project record for lowest surface error.
+
+Per-Dataset Breakdown:
+- BUS-BRA: Dice 87.43%, IoU 78.86%, 95HD 16.74 px, ASD 4.21 px
+- BUSI: Dice 77.96%, IoU 69.05%, 95HD 27.36 px, ASD 9.35 px
+- BUS-UCLM: Dice 84.16%, IoU 74.37%, 95HD 31.74 px, ASD 7.03 px
+
+Hugging Face Release:
+- Published to `Ahorts/G17-AMFU-Net-Paper` on branch `exp33-unet-dag-boundary-raw-cosine-only`.
