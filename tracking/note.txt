@@ -1042,3 +1042,42 @@ Architectural Findings:
 
 Hugging Face Release:
 - Published to Ahorts/G17-AMFU-Net-Paper on branch exp35-unet-mfef-boundary-raw-cosine-only.
+
+
+Session 11 - Exp-36: SRAD Alone with DAG Attention Gates & Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Evaluate the impact of explicit boundary supervision (Active Contour Morphological Gradient) on anisotropic diffusion filtered ultrasound (SRAD Alone) with DAG attention gating, completing the four-modality evaluation row for the U-Net + DAG architecture.
+
+Methodology:
+1. Architecture: U-Net + DAG Attention Gates (DAG=True, MFEF=False, base_channels=32, params=6.19M).
+2. Input Modality: SRAD Alone (srad_image, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 83.76% (vs. Exp-37 SRAD baseline 83.50%, +0.26%)
+- Test Jaccard (IoU): 74.70% (vs. Exp-37 74.56%, +0.14%)
+- 95% Hausdorff Distance (95HD): 24.16 px (vs. Exp-37 21.91 px, +2.25 px)
+- Average Surface Distance (ASD): 6.46 px (vs. Exp-37 6.69 px, -0.23 px / -3.4% surface error reduction)
+- Test Loss: 0.6650
+
+Per-Dataset Breakdown:
+- BUS-UCLM: Dice 88.05%, IoU 79.52%, 95HD 27.52 px, ASD 6.05 px
+- BUS-BRA: Dice 85.16%, IoU 76.00%, 95HD 20.76 px, ASD 5.25 px
+- BUSI: Dice 78.63%, IoU 69.73%, 95HD 33.22 px, ASD 10.10 px
+
+Comparative & Architectural Findings:
+- Completes the U-Net + DAG boundary loss quadrant:
+  * Raw (Exp-33): 84.96% Dice, 20.20 px 95HD, 5.62 px ASD
+  * CLAHE (Exp-32): 84.47% Dice, 19.04 px 95HD, 5.74 px ASD
+  * SRAD (Exp-36): 83.76% Dice, 24.16 px 95HD, 6.46 px ASD
+  * Dual Enhanced (Exp-34): 82.10% Dice, 25.69 px 95HD, 7.26 px ASD
+- On external cohort BUS-UCLM, SRAD combined with DAG gating and boundary supervision achieved 88.05% Dice, outperforming other DAG configurations on this sub-distribution.
+- Overall surface boundary error (ASD) improved over baseline Exp-37 from 6.69 px to 6.46 px.
+
+Hugging Face Release:
+- Published to Ahorts/G17-AMFU-Net-Paper on branch exp36-unet-dag-boundary-srad-cosine-only.
