@@ -973,3 +973,39 @@ Per-Dataset Breakdown:
 
 Hugging Face Release:
 - Published to `Ahorts/G17-AMFU-Net-Paper` on branch `exp33-unet-dag-boundary-raw-cosine-only`.
+
+
+Session 9 - Exp-34: Dual-Enhanced Ultrasound with Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Evaluate whether applying explicit boundary supervision (Active Contour Morphological Gradient) to dual-enhanced ultrasound (SRAD + CLAHE) tightens boundary delineation while preserving the superior clinical recall and acoustic shadow penetration observed in Enhanced models.
+
+Methodology:
+1. Architecture: AMFU-Net (DAG=True, MFEF=False, base_channels=32, params=31.05M).
+2. Input Modality: Dual-Enhanced Ultrasound (`image`: SRAD + CLAHE, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 82.10% (vs. Exp-25 Enhanced baseline 82.76%)
+- Test Jaccard (IoU): 72.91% (vs. Exp-25 73.77%)
+- 95% Hausdorff Distance (95HD): 25.69 px (vs. Exp-25 26.75 px, -1.06 px boundary error reduction)
+- Average Surface Distance (ASD): 7.26 px (vs. Exp-25 7.96 px, -0.70 px / -8.8% surface error reduction)
+
+Per-Dataset Breakdown:
+- BUS-UCLM: Dice 86.11%, IoU 76.96%, 95HD 20.09 px, ASD 4.82 px
+- BUS-BRA: Dice 83.59%, IoU 74.46%, 95HD 22.96 px, ASD 6.42 px
+- BUSI: Dice 76.75%, IoU 67.39%, 95HD 35.05 px, ASD 10.31 px
+
+Clinical Synthesis & Trade-off:
+- Boundary Loss successfully tightened the boundary contour on Enhanced images (-1.06 px 95HD, -0.70 px ASD).
+- Complementary Modality Roles:
+  * Enhanced Stream: Serves as the high-recall anchor, maintaining activation in deep acoustic shadows and low-contrast posterior voids where Raw can drop weak signals.
+  * Raw / CLAHE Streams: Provide steep native acoustic impedance gradients to maximize sharp margin delineation.
+  * This confirmed trade-off directly supports dual-stream fusion, combining Enhanced's clinical sensitivity with Raw's boundary precision.
+
+Hugging Face Release:
+- Published to `Ahorts/G17-AMFU-Net-Paper` on branch `exp34-unet-dag-boundary-enhanced-cosine-only`.
