@@ -1190,3 +1190,38 @@ Comparative & Architectural Findings:
 
 Hugging Face Release:
 - Published to Ahorts/G17-AMFU-Net-Paper on branch exp39-unet-mfef-boundary-enhanced-cosine-only.
+
+
+Session 15 - Exp-56: Raw Ultrasound with Full AMFU-Net (DAG + MFEF) & Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Evaluate the complete AMFU-Net architecture (incorporating both DAG skip attention gates and MFEF multi-scale bottleneck convolutions) under explicit boundary supervision (Active Contour Morphological Gradient) on unfiltered native ultrasound (Raw modality).
+
+Methodology:
+1. Architecture: Full AMFU-Net (DAG=True, MFEF=True, base_channels=32, params=19.03M).
+2. Input Modality: Raw Ultrasound (raw_image, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 83.84% (vs. Exp-43 Raw Full AMFU baseline 83.97%, -0.13%)
+- Test Jaccard (IoU): 74.69% (vs. Exp-43 75.20%, -0.51%)
+- 95% Hausdorff Distance (95HD): 23.05 px (vs. Exp-43 24.73 px, -1.68 px / -6.8% boundary error reduction)
+- Average Surface Distance (ASD): 6.42 px (vs. Exp-43 7.46 px, -1.04 px / -13.9% surface error reduction)
+- Test Loss: 0.6625
+
+Per-Dataset Breakdown:
+- BUS-BRA: Dice 85.90%, IoU 76.78%, 95HD 18.98 px, ASD 4.94 px
+- BUS-UCLM: Dice 82.67%, IoU 71.80%, 95HD 28.60 px, ASD 7.05 px
+- BUSI: Dice 78.15%, IoU 69.34%, 95HD 33.49 px, ASD 10.57 px
+
+Comparative & Architectural Findings:
+- Explicit boundary supervision significantly reduced surface localization error across the full architecture, lowering global ASD by 1.04 px (-13.9%) and 95HD by 1.68 px relative to baseline Exp-43.
+- On BUS-UCLM, DAG skip attention gating preserved boundary stability (28.60 px 95HD, 7.05 px ASD) compared to MFEF-only variants (Exp-51: 49.31 px 95HD; Exp-54: 50.84 px 95HD; Exp-55: 49.20 px 95HD), demonstrating that DAG gates successfully mitigate multi-scale boundary dispersion.
+- Efficiency Trade-Off: U-Net + DAG alone (Exp-49: 84.96% Dice, 20.20 px 95HD, 5.62 px ASD, 6.19M params) maintains superior geometric precision over Full AMFU-Net (Exp-56: 83.84% Dice, 23.05 px 95HD, 6.42 px ASD, 19.03M params), indicating that the MFEF module introduces slight parameter redundancy when edge gradients are already well-defined.
+
+Hugging Face Release:
+- Published to Ahorts/G17-AMFU-Net-Paper on branch exp56-full-amfu-boundary-raw-cosine-only.
