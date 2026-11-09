@@ -1293,3 +1293,42 @@ Comparative & Architectural Findings:
 
 Hugging Face Release:
 - Published to Ahorts/G17-AMFU-Net-Paper on branch exp58-full-amfu-boundary-srad-cosine-only.
+
+
+Session 18 - Exp-59: Dual-Enhanced Ultrasound with Full AMFU-Net (DAG + MFEF) & Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Evaluate the complete AMFU-Net architecture (incorporating both DAG skip attention gates and MFEF multi-scale bottleneck convolutions) under explicit boundary supervision (Active Contour Morphological Gradient) on dual-enhanced ultrasound (SRAD + CLAHE), completing the four-modality evaluation row for Full AMFU-Net.
+
+Methodology:
+1. Architecture: Full AMFU-Net (DAG=True, MFEF=True, base_channels=32, params=19.03M).
+2. Input Modality: Dual-Enhanced Ultrasound (image: SRAD + CLAHE, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 81.51% (vs. Exp-42 Enhanced Full AMFU baseline 81.61%, -0.10%)
+- Test Jaccard (IoU): 71.68% (vs. Exp-42 72.14%, -0.46%)
+- 95% Hausdorff Distance (95HD): 27.64 px (vs. Exp-42 31.50 px, -3.86 px / -12.3% boundary error reduction)
+- Average Surface Distance (ASD): 7.47 px (vs. Exp-42 9.43 px, -1.96 px / -20.8% surface error reduction)
+- Test Loss: 0.7208
+
+Per-Dataset Breakdown:
+- BUS-BRA: Dice 83.23%, IoU 73.38%, 95HD 25.86 px, ASD 6.66 px
+- BUS-UCLM: Dice 82.66%, IoU 72.29%, 95HD 22.68 px, ASD 5.68 px
+- BUSI: Dice 76.24%, IoU 66.57%, 95HD 34.05 px, ASD 10.27 px
+
+Comparative & Architectural Findings:
+- Completes the Full AMFU-Net boundary loss quadrant:
+  * Raw (Exp-56): 83.84% Dice, 23.05 px 95HD, 6.42 px ASD
+  * CLAHE (Exp-57): 83.58% Dice, 26.29 px 95HD, 7.55 px ASD
+  * SRAD (Exp-58): 80.77% Dice, 27.58 px 95HD, 7.89 px ASD
+  * Dual Enhanced (Exp-59): 81.51% Dice, 27.64 px 95HD, 7.47 px ASD
+- Explicit boundary supervision delivered substantial contour tightening on dual-enhanced inputs, reducing 95HD by 3.86 px (-12.3%) and ASD by 1.96 px (-20.8%) relative to baseline Exp-42.
+- On external cohort BUS-UCLM, DAG attention gating paired with boundary loss stabilized margin delineation, slashing 95HD from 34.66 px to 22.68 px (-11.98 px) and ASD from 9.62 px to 5.68 px (-3.94 px).
+
+Hugging Face Release:
+- Published to Ahorts/G17-AMFU-Net-Paper on branch exp59-full-amfu-boundary-enhanced-cosine-only.
