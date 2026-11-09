@@ -1434,3 +1434,38 @@ Comparative & Architectural Findings:
 
 Hugging Face Release:
 - Published to Ahorts/G17-AMFU-Net-Paper on branch exp62-plain-unet-boundary-srad-cosine-only.
+
+
+Session 22 - Exp-63: Plain U-Net Baseline on Dual-Enhanced Ultrasound with Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Evaluate the Plain U-Net baseline on dual-enhanced ultrasound (SRAD + CLAHE) under explicit boundary supervision, concluding the final cell of the 16-experiment boundary ablation factorial matrix.
+
+Methodology:
+1. Architecture: Plain U-Net Baseline (DAG=False, MFEF=False, base_channels=32, params=3,833,505).
+2. Input Modality: Dual-Enhanced Ultrasound (image: SRAD + CLAHE, 1-channel, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 78.70% (vs. Exp-36 Plain U-Net Dual Enhanced baseline 79.65%, -0.95%)
+- Test Jaccard (IoU): 68.59% (vs. Exp-36 69.76%, -1.17%)
+- 95% Hausdorff Distance (95HD): 35.09 px (vs. Exp-36 34.59 px, +0.50 px)
+- Average Surface Distance (ASD): 10.46 px (vs. Exp-36 10.72 px, -0.26 px / -2.4% error reduction)
+- Test Loss: 0.7777
+
+Per-Dataset Breakdown:
+- BUS-BRA: Dice 81.85%, IoU 72.15%, 95HD 29.18 px, ASD 8.12 px
+- BUS-UCLM: Dice 72.17%, IoU 58.87%, 95HD 61.47 px, ASD 19.26 px
+- BUSI: Dice 71.19%, IoU 60.69%, 95HD 45.67 px, ASD 15.06 px
+
+Comparative & Architectural Findings:
+- Full Matrix Closure (16/16 Factorial Experiments Complete): Completion of Exp-63 finalizes every cell of the 4-architecture x 4-modality boundary-aware ablation matrix.
+- Compounded Filtering Penalty on Plain Architectures: Compounding SRAD PDE diffusion with CLAHE creates high-contrast artificial edge transitions. In the absence of DAG attention gates, the active contour gradient oscillates between true tumor margins and amplified acoustic halos, depressing Dice to 78.70% (vs 82.10% on U-Net + DAG in Exp-50).
+- Cross-Center Stabilization: On external cohort BUS-UCLM, boundary supervision stabilized the Plain U-Net prediction against catastrophic under-segmentation, improving Dice from 69.23% to 72.17% (+2.94%) and cutting 95HD from 68.18 px to 61.47 px (-6.71 px).
+
+Hugging Face Release:
+- Published to Ahorts/G17-AMFU-Net-Paper on branch exp63-plain-unet-boundary-enhanced-cosine-only.
