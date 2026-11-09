@@ -1366,3 +1366,37 @@ Comparative & Architectural Findings:
 
 Hugging Face Release:
 - Published to Ahorts/G17-AMFU-Net-Paper on branch exp60-plain-unet-boundary-raw-cosine-only.
+
+
+Session 20 - Exp-61: Plain U-Net Baseline on CLAHE Alone with Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Evaluate the standard Plain U-Net baseline (without DAG attention gates or MFEF bottleneck modules) under explicit boundary supervision on contrast-equalized ultrasound (CLAHE Alone), establishing the 14th run of the 16-experiment boundary ablation factorial matrix.
+
+Methodology:
+1. Architecture: Plain U-Net Baseline (DAG=False, MFEF=False, base_channels=32, params=3,833,505).
+2. Input Modality: CLAHE Alone (clahe_image, 1-channel, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 80.88% (vs. Exp-34 Plain U-Net CLAHE baseline 81.74%, -0.86%)
+- Test Jaccard (IoU): 71.39% (vs. Exp-34 72.54%, -1.15%)
+- 95% Hausdorff Distance (95HD): 36.87 px (vs. Exp-34 33.95 px, +2.92 px)
+- Average Surface Distance (ASD): 10.21 px (vs. Exp-34 9.87 px, +0.34 px / +3.4% error increase)
+- Test Loss: 0.7253
+
+Per-Dataset Breakdown:
+- BUS-BRA: Dice 84.02%, IoU 75.15%, 95HD 27.95 px, ASD 7.25 px
+- BUS-UCLM: Dice 72.39%, IoU 59.01%, 95HD 72.74 px, ASD 21.86 px
+- BUSI: Dice 73.89%, IoU 63.56%, 95HD 53.81 px, ASD 15.89 px
+
+Comparative & Architectural Findings:
+- Contrast Amplification Trap Without Attention Gates: In the absence of DAG attention gates to filter skip connections, local contrast enhancement from CLAHE amplifies acoustic speckle borders in surrounding parenchyma. The boundary active contour gradient locks onto these false edges, increasing 95HD from 33.95 px to 36.87 px (+2.92 px error penalty) and depressing Dice by -0.86%.
+- Dramatic Contrast with U-Net + DAG (Exp-48): Adding DAG attention gates to the exact same CLAHE input under boundary supervision (Exp-48) lifts Dice to 84.47% (+3.59% absolute gain), cuts 95HD nearly in half to 19.04 px (-17.83 px boundary error reduction), and reduces ASD to 5.74 px (-4.47 px / -43.8% surface error reduction). This demonstrates that attention gating is functionally indispensable when pairing boundary loss with contrast-enhanced modalities.
+
+Hugging Face Release:
+- Published to Ahorts/G17-AMFU-Net-Paper on branch exp61-plain-unet-boundary-clahe-cosine-only.
