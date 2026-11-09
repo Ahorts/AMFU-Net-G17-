@@ -1332,3 +1332,37 @@ Comparative & Architectural Findings:
 
 Hugging Face Release:
 - Published to Ahorts/G17-AMFU-Net-Paper on branch exp59-full-amfu-boundary-enhanced-cosine-only.
+
+
+Session 19 - Exp-60: Plain U-Net Baseline on Raw Ultrasound with Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Establish the lower-bound architectural ablation baseline by evaluating the standard Plain U-Net (omitting both DAG skip attention gates and MFEF multi-scale bottleneck expansions) under explicit active contour morphological boundary supervision on unprocessed raw ultrasound, initiating the final 4-run Plain U-Net boundary ablation quadrant.
+
+Methodology:
+1. Architecture: Plain U-Net Baseline (DAG=False, MFEF=False, base_channels=32, params=3,833,505).
+2. Input Modality: Raw Ultrasound (raw_image, 1-channel, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 81.28% (vs. Exp-32 Plain U-Net Raw baseline 81.31%, -0.03%)
+- Test Jaccard (IoU): 71.96% (vs. Exp-32 72.04%, -0.08%)
+- 95% Hausdorff Distance (95HD): 33.80 px (vs. Exp-32 31.41 px, +2.39 px)
+- Average Surface Distance (ASD): 9.23 px (vs. Exp-32 9.89 px, -0.66 px / -6.7% surface error reduction)
+- Test Loss: 0.7195
+
+Per-Dataset Breakdown:
+- BUS-BRA: Dice 84.49%, IoU 75.51%, 95HD 25.22 px, ASD 6.32 px
+- BUS-UCLM: Dice 74.10%, IoU 61.26%, 95HD 83.99 px, ASD 24.12 px
+- BUSI: Dice 73.75%, IoU 64.30%, 95HD 46.21 px, ASD 13.98 px
+
+Comparative & Architectural Findings:
+- Contrast Leakage Without Attention Gates: In the absence of DAG attention gates, boundary supervision alone cannot restrain false positive spillover into surrounding parenchyma on low-contrast external cohorts. On BUS-UCLM, 95HD exploded to 83.99 px and ASD to 24.12 px (compared to 20.20 px 95HD and 5.62 px ASD for U-Net + DAG in Exp-49).
+- Comparison with U-Net + DAG (Exp-49): Adding DAG skip-connection attention gates yields a +3.68% absolute gain in Dice (84.96% vs 81.28%), cuts 95HD by 13.60 px (20.20 px vs 33.80 px), and reduces ASD by 3.61 px (5.62 px vs 9.23 px), proving that attention gating is functionally prerequisite for precise morphological boundary localization.
+
+Hugging Face Release:
+- Published to Ahorts/G17-AMFU-Net-Paper on branch exp60-plain-unet-boundary-raw-cosine-only.
