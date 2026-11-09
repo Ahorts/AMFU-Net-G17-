@@ -1400,3 +1400,37 @@ Comparative & Architectural Findings:
 
 Hugging Face Release:
 - Published to Ahorts/G17-AMFU-Net-Paper on branch exp61-plain-unet-boundary-clahe-cosine-only.
+
+
+Session 21 - Exp-62: Plain U-Net Baseline on SRAD Alone with Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Evaluate the Plain U-Net baseline on speckle-reduced anisotropic diffusion ultrasound (SRAD Alone) under explicit boundary supervision, establishing the 15th experiment in the 16-run boundary ablation battery.
+
+Methodology:
+1. Architecture: Plain U-Net Baseline (DAG=False, MFEF=False, base_channels=32, params=3,833,505).
+2. Input Modality: SRAD Alone (srad_image, 1-channel, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 80.19% (vs. Exp-33 Plain U-Net SRAD baseline 78.27%, +1.92%)
+- Test Jaccard (IoU): 70.66% (vs. Exp-33 69.06%, +1.60%)
+- 95% Hausdorff Distance (95HD): 31.46 px (vs. Exp-33 33.01 px, -1.55 px boundary error reduction)
+- Average Surface Distance (ASD): 8.82 px (vs. Exp-33 10.44 px, -1.62 px / -15.5% surface error reduction)
+- Test Loss: 0.7482
+
+Per-Dataset Breakdown:
+- BUS-BRA: Dice 83.44%, IoU 74.03%, 95HD 25.98 px, ASD 6.61 px
+- BUS-UCLM: Dice 74.54%, IoU 62.48%, 95HD 59.04 px, ASD 19.22 px
+- BUSI: Dice 72.17%, IoU 62.89%, 95HD 40.49 px, ASD 12.62 px
+
+Comparative & Architectural Findings:
+- Speckle Smoothing Facilitates Boundary Anchoring: Unlike CLAHE (which amplified noise and induced boundary latching on false speckle edges in Exp-61), SRAD non-linear anisotropic diffusion creates piecewise homogeneous acoustic regions. This allows the active contour boundary loss to reliably anchor to true lesion borders even without DAG attention gates, yielding across-the-board gains (+1.92% Dice, +1.60% IoU, -1.55 px 95HD, -1.62 px ASD).
+- External Cohort Rescue: On the low-contrast Spanish cohort BUS-UCLM, boundary supervision combined with SRAD diffusion lifted Dice from 67.61% to 74.54% (+6.93% Dice) and slashed 95HD from 73.69 px to 59.04 px (-14.65 px / -19.9% error reduction) and ASD from 25.44 px to 19.22 px (-6.22 px / -24.4% error reduction).
+
+Hugging Face Release:
+- Published to Ahorts/G17-AMFU-Net-Paper on branch exp62-plain-unet-boundary-srad-cosine-only.
