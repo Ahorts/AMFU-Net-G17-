@@ -1225,3 +1225,37 @@ Comparative & Architectural Findings:
 
 Hugging Face Release:
 - Published to Ahorts/G17-AMFU-Net-Paper on branch exp56-full-amfu-boundary-raw-cosine-only.
+
+
+Session 16 - Exp-57: CLAHE Alone with Full AMFU-Net (DAG + MFEF) & Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Evaluate the complete AMFU-Net architecture (DAG attention gating and MFEF multi-scale bottleneck convolutions) under explicit boundary supervision (Active Contour Morphological Gradient) on local contrast-enhanced ultrasound (CLAHE Alone).
+
+Methodology:
+1. Architecture: Full AMFU-Net (DAG=True, MFEF=True, base_channels=32, params=19.03M).
+2. Input Modality: CLAHE Alone (clahe_image, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 83.58% (vs. Exp-41 CLAHE Full AMFU baseline 83.27%, +0.31%)
+- Test Jaccard (IoU): 74.62% (vs. Exp-41 74.49%, +0.13%)
+- 95% Hausdorff Distance (95HD): 26.29 px (vs. Exp-41 24.85 px, +1.44 px)
+- Average Surface Distance (ASD): 7.55 px (vs. Exp-41 7.53 px, +0.02 px)
+- Test Loss: 0.6713
+
+Per-Dataset Breakdown:
+- BUS-BRA: Dice 86.51%, IoU 77.64%, 95HD 20.79 px, ASD 5.24 px
+- BUS-UCLM: Dice 83.44%, IoU 73.46%, 95HD 45.70 px, ASD 11.22 px
+- BUSI: Dice 75.08%, IoU 66.14%, 95HD 37.41 px, ASD 13.36 px
+
+Comparative & Architectural Findings:
+- Adding boundary loss on CLAHE contrast enhanced inputs yielded a net Dice increase over baseline Exp-41 (+0.31% Dice, +0.13% IoU), led primarily by BUS-BRA (86.51% vs 85.25%, with ASD improving from 6.03 px to 5.24 px).
+- Similar to earlier single-modality evaluations, U-Net + DAG alone (Exp-48: 84.47% Dice, 19.04 px 95HD, 5.74 px ASD, 6.19M params) demonstrated tighter boundary delineation than the heavier Full AMFU-Net (Exp-57: 83.58% Dice, 26.29 px 95HD, 7.55 px ASD, 19.03M params), confirming that multi-scale bottleneck pooling introduces slight boundary softness on contrast-enhanced inputs.
+
+Hugging Face Release:
+- Published to Ahorts/G17-AMFU-Net-Paper on branch exp57-full-amfu-boundary-clahe-cosine-only.
