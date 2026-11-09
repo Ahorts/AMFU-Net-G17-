@@ -1259,3 +1259,37 @@ Comparative & Architectural Findings:
 
 Hugging Face Release:
 - Published to Ahorts/G17-AMFU-Net-Paper on branch exp57-full-amfu-boundary-clahe-cosine-only.
+
+
+Session 17 - Exp-58: SRAD Alone with Full AMFU-Net (DAG + MFEF) & Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Evaluate the complete AMFU-Net architecture (DAG attention gating and MFEF multi-scale bottleneck convolutions) under explicit boundary supervision (Active Contour Morphological Gradient) on anisotropic diffusion filtered ultrasound (SRAD Alone).
+
+Methodology:
+1. Architecture: Full AMFU-Net (DAG=True, MFEF=True, base_channels=32, params=19.03M).
+2. Input Modality: SRAD Alone (srad_image, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 80.77% (vs. Exp-40 SRAD Full AMFU baseline 82.12%, -1.35%)
+- Test Jaccard (IoU): 71.48% (vs. Exp-40 72.72%, -1.24%)
+- 95% Hausdorff Distance (95HD): 27.58 px (vs. Exp-40 26.28 px, +1.30 px)
+- Average Surface Distance (ASD): 7.89 px (vs. Exp-40 7.76 px, +0.13 px)
+- Test Loss: 0.7194
+
+Per-Dataset Breakdown:
+- BUS-BRA: Dice 83.38%, IoU 73.83%, 95HD 24.31 px, ASD 6.25 px
+- BUS-UCLM: Dice 81.68%, IoU 71.77%, 95HD 27.03 px, ASD 7.03 px
+- BUSI: Dice 72.96%, IoU 64.57%, 95HD 37.22 px, ASD 12.88 px
+
+Comparative & Architectural Findings:
+- Combining MFEF multi-scale bottleneck expansions with SRAD filtered inputs and boundary loss resulted in a net performance drop across cohorts (80.77% Dice vs 83.76% in Exp-52).
+- Bottleneck Parameter Redundancy: Full AMFU-Net (19.03M params) consistently trails U-Net + DAG alone (Exp-52: 83.76% Dice, 24.16 px 95HD, 6.46 px ASD, 6.19M params) by -2.99% Dice and +3.42 px 95HD, demonstrating that dilated receptive field expansions at the bottleneck dilute the sharpened edge transitions produced by SRAD PDE anisotropic diffusion.
+
+Hugging Face Release:
+- Published to Ahorts/G17-AMFU-Net-Paper on branch exp58-full-amfu-boundary-srad-cosine-only.
