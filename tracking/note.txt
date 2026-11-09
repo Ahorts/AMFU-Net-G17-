@@ -1116,3 +1116,38 @@ Comparative & Architectural Findings:
 
 Hugging Face Release:
 - Published to Ahorts/G17-AMFU-Net-Paper on branch exp37-unet-mfef-boundary-clahe-cosine-only.
+
+
+Session 13 - Exp-38: SRAD Alone with MFEF Bottleneck & Boundary-Aware Focal Tversky Loss
+
+Problem Statement:
+Evaluate the combination of multi-scale bottleneck feature extraction (MFEF) with explicit boundary supervision (Active Contour Morphological Gradient) on anisotropic diffusion filtered ultrasound (SRAD Alone).
+
+Methodology:
+1. Architecture: U-Net + MFEF Bottleneck (DAG=False, MFEF=True, base_channels=32, params=16.68M).
+2. Input Modality: SRAD Alone (srad_image, 256x256).
+3. Loss Function: Compound Boundary-Aware Focal Tversky Loss:
+   Loss = (BCE + FTL) + 0.5 * (1.0 - BoundaryDice)
+   - Boundary Extractor: Differentiable morphological gradient on CUDA:
+     Boundary = MaxPool2d(x) - (-MaxPool2d(-x))
+4. Training: 200 epochs on GPU via Molab Marimo runtime (Adam lr=1e-3, Cosine Annealing min_lr=1e-5).
+
+Quantitative Results (Held-Out Test Set - 266 Scans):
+- Test Dice: 83.09% (vs. Exp-44 SRAD MFEF baseline 82.26%, +0.83%)
+- Test Jaccard (IoU): 74.64% (vs. Exp-44 73.99%, +0.65%)
+- 95% Hausdorff Distance (95HD): 20.97 px (vs. Exp-44 21.64 px, -0.67 px boundary error reduction)
+- Average Surface Distance (ASD): 6.34 px (vs. Exp-44 7.03 px, -0.69 px / -9.8% surface error reduction)
+- Test Loss: 0.6822
+
+Per-Dataset Breakdown:
+- BUS-BRA: Dice 84.98%, IoU 76.70%, 95HD 16.16 px, ASD 4.88 px
+- BUSI: Dice 78.29%, IoU 69.84%, 95HD 27.48 px, ASD 8.46 px
+- BUS-UCLM: Dice 80.33%, IoU 69.94%, 95HD 50.84 px, ASD 14.76 px
+
+Comparative & Architectural Findings:
+- Adding boundary loss to MFEF on SRAD filtered inputs delivered consistent gains across all three cohorts over baseline Exp-44 (+0.83% Dice, -0.67 px 95HD, -0.69 px ASD).
+- On BUSI, boundary distance tightened from 29.97 px to 27.48 px (-2.49 px), with surface error reduced from 9.83 px to 8.46 px (-1.37 px).
+- As with other non-DAG configurations, the absence of skip attention gates permitted boundary dispersion on low-contrast BUS-UCLM transitions (95HD of 50.84 px vs 27.52 px in Exp-36).
+
+Hugging Face Release:
+- Published to Ahorts/G17-AMFU-Net-Paper on branch exp38-unet-mfef-boundary-srad-cosine-only.
